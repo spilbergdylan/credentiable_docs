@@ -40,20 +40,34 @@ class DocumentStructurer:
         
         # Special case for tables
         if element.get('class') == 'table':
-            # Check if table is vertically close to section (within 100 pixels)
-            vertical_proximity = 100
+            # Calculate overlap
+            overlap_width = min(e_right, c_right) - max(e_left, c_left)
+            overlap_height = min(e_bottom, c_bottom) - max(e_top, c_top)
+            
+            if overlap_width <= 0 or overlap_height <= 0:
+                return False
+                
+            element_area = e_w * e_h
+            overlap_area = overlap_width * overlap_height
+            
+            # For tables, require at least 30% vertical overlap with the section
+            vertical_overlap_ratio = overlap_height / e_h
+            if vertical_overlap_ratio < 0.3:  # Less than 30% vertical overlap
+                return False
+            
+            # Also require significant horizontal overlap (at least 20%)
+            horizontal_overlap_ratio = overlap_width / min(e_w, c_w)
+            if horizontal_overlap_ratio < 0.2:  # Less than 20% horizontal overlap
+                return False
+            
+            # Check if table is vertically positioned within or very close to the section
+            vertical_proximity = 100  # pixels
             is_vertically_close = (
-                abs(e_top - c_bottom) < vertical_proximity or  # Table starts near section bottom
-                abs(e_bottom - c_top) < vertical_proximity or  # Table ends near section top
-                (e_top >= c_top and e_bottom <= c_bottom) or  # Table is fully within section vertically
-                (e_top <= c_bottom and e_bottom >= c_top)     # Table overlaps with section
+                (e_top >= c_top - vertical_proximity and e_bottom <= c_bottom + vertical_proximity) or  # Table is within or very close to section
+                (e_top <= c_bottom + vertical_proximity and e_bottom >= c_top - vertical_proximity)     # Table overlaps with section
             )
             
-            # Check if table has significant horizontal overlap with section
-            horizontal_overlap = min(e_right, c_right) - max(e_left, c_left)
-            min_horizontal_overlap = min(e_w, c_w) * 0.3  # 30% overlap
-            
-            return is_vertically_close and horizontal_overlap > min_horizontal_overlap
+            return is_vertically_close
         
         # Special case for fields within tables
         if element.get('class') in ['field', 'checkbox', 'checkbox_option', 'checkbox_context'] and container.get('class') == 'table':
@@ -88,7 +102,7 @@ class DocumentStructurer:
             overlap_area = overlap_width * overlap_height
             
             # Also check if checkbox is vertically close to its context
-            vertical_proximity = 100  # pixels - increased from 50 to 100
+            vertical_proximity = 100  # pixels
             is_vertically_close = (
                 abs(e_top - c_bottom) < vertical_proximity or  # Checkbox starts near context bottom
                 abs(e_bottom - c_top) < vertical_proximity or  # Checkbox ends near context top
@@ -185,324 +199,275 @@ class DocumentStructurer:
         return (overlap_area / element_area) > threshold
 
     def _build_hierarchy(self, predictions: List[Dict]) -> Dict:
-        """Build a hierarchical structure based on spatial relationships."""
-        # Sort sections and other elements
-        sections = [p for p in predictions if p['class'] == 'section']
-        tables = [p for p in predictions if p['class'] == 'table']
+        """Build hierarchical structure from predictions."""
+        # First, sort all elements by y-coordinate
+        sorted_elements = sorted(predictions, key=lambda x: x['y'])
         
-        # Separate fields by type for better organization
-        regular_fields = [p for p in predictions if p['class'] == 'field']
-        checkbox_contexts = [p for p in predictions if p['class'] == 'checkbox_context']
-        checkbox_options = [p for p in predictions if p['class'] == 'checkbox_option']
-        checkboxes = [p for p in predictions if p['class'] == 'checkbox']
+        # Create a map of all elements for quick lookup
+        elements_map = {elem['detection_id']: elem for elem in predictions}
         
-        print(f"\nFound {len(sections)} sections, {len(tables)} tables")
-        print(f"Fields: {len(regular_fields)}, Checkbox contexts: {len(checkbox_contexts)}")
-        print(f"Checkbox options: {len(checkbox_options)}, Checkboxes: {len(checkboxes)}")
+        # Track which elements have been assigned to tables
+        assigned_to_tables = set()
         
-        # Sort sections and tables by y-coordinate (top to bottom)
-        sections.sort(key=lambda x: float(x['y']))
-        tables.sort(key=lambda x: float(x['y']))
-        
-        document_structure = {
-            'sections': {},
-            'tables': {}
-        }
-        
-        # Process each section
-        for section in sections:
-            section_id = section['detection_id']
-            section_text = section.get('text', '').strip()
-            
-            # Find all elements contained within this section
-            contained_fields = [
-                field for field in regular_fields 
-                if self._is_contained_within(field, section)
-            ]
-            
-            contained_tables = [
-                table for table in tables 
-                if self._is_contained_within(table, section)
-            ]
-            
-            # Find checkbox contexts in this section
-            contained_checkbox_contexts = [
-                context for context in checkbox_contexts 
-                if self._is_contained_within(context, section)
-            ]
-            
-            # Sort elements by y-coordinate
-            contained_fields.sort(key=lambda x: float(x['y']))
-            contained_tables.sort(key=lambda x: float(x['y']))
-            contained_checkbox_contexts.sort(key=lambda x: float(x['y']))
-            
-            # Debug logging for checkbox contexts
-            print(f"Section {section_id} has {len(contained_checkbox_contexts)} checkbox contexts")
-            for context in contained_checkbox_contexts:
-                print(f"  - Checkbox context: {context['detection_id']}, text: '{context.get('text', '')}'")
-            
-            # Create section entry
-            section_data = {
-                'title': section_text,
-                'fields': [],
-                'tables': {},
-                'checkbox_contexts': {}
-            }
-            
-            # Add regular fields to section
-            for field in contained_fields:
-                field_data = {
-                    'type': 'field',
-                    'text': field.get('text', '').strip(),
-                    'confidence': field.get('confidence', 0),
-                    'detection_id': field['detection_id']
-                }
-                section_data['fields'].append(field_data)
-            
-            # Add tables to section
-            for table in contained_tables:
-                table_id = table['detection_id']
-                table_text = table.get('text', '').strip()
+        # First pass: Process tables and their contained elements
+        tables = {}
+        for elem in sorted_elements:
+            if elem['class'] == 'table':
+                table_id = elem['detection_id']
+                table_elem = elements_map[table_id]
                 
-                # Find fields contained within this table
-                table_fields = [
-                    field for field in regular_fields 
-                    if self._is_contained_within(field, table)
-                ]
-                table_fields.sort(key=lambda x: float(x['y']))
+                # Find fields and checkbox contexts contained within this table
+                table_fields = []
+                table_checkbox_contexts = []
                 
-                # Create table entry
-                table_data = {
+                for other_elem in sorted_elements:
+                    if other_elem['detection_id'] == table_id:
+                        continue
+                        
+                    if self._is_contained_within(other_elem, table_elem):
+                        if other_elem['class'] == 'field':
+                            table_fields.append(other_elem)
+                            assigned_to_tables.add(other_elem['detection_id'])
+                        elif other_elem['class'] == 'checkbox_context':
+                            table_checkbox_contexts.append(other_elem)
+                            assigned_to_tables.add(other_elem['detection_id'])
+                
+                # Create table entry with its fields and checkbox contexts
+                tables[table_id] = {
                     'type': 'table',
-                    'text': table_text,
-                    'confidence': table.get('confidence', 0),
+                    'text': table_elem.get('text', ''),
+                    'confidence': table_elem.get('confidence', 0.0),
                     'detection_id': table_id,
-                    'fields': []
-                }
-                
-                # Add fields to table
-                for field in table_fields:
-                    field_data = {
+                    'fields': [{
                         'type': 'field',
-                        'text': field.get('text', '').strip(),
-                        'confidence': field.get('confidence', 0),
+                        'text': field.get('text', ''),
+                        'confidence': field.get('confidence', 0.0),
                         'detection_id': field['detection_id']
-                    }
-                    table_data['fields'].append(field_data)
-                
-                section_data['tables'][table_id] = table_data
-            
-            # Process checkbox contexts and their hierarchy
-            for context in contained_checkbox_contexts:
-                context_id = context['detection_id']
-                context_text = context.get('text', '').strip()
-                
-                # Find checkbox options in this context
-                context_options = [
-                    option for option in checkbox_options 
-                    if self._is_contained_within(option, context)
-                ]
-                context_options.sort(key=lambda x: float(x['y']))
-                
-                # Debug logging for checkbox options
-                print(f"  Checkbox context {context_id} has {len(context_options)} options")
-                for option in context_options:
-                    print(f"    - Option: {option['detection_id']}, text: '{option.get('text', '')}'")
-                
-                # Create checkbox context entry
-                context_data = {
-                    'type': 'checkbox_context',
-                    'text': context_text,
-                    'confidence': context.get('confidence', 0),
-                    'detection_id': context_id,
-                    'checkbox_options': {}
+                    } for field in table_fields],
+                    'checkbox_contexts': [{
+                        'type': 'checkbox_context',
+                        'text': context.get('text', ''),
+                        'confidence': context.get('confidence', 0.0),
+                        'detection_id': context['detection_id']
+                    } for context in table_checkbox_contexts]
                 }
-                
-                # Process each checkbox option
-                for option in context_options:
-                    option_id = option['detection_id']
-                    option_text = option.get('text', '').strip()
-                    
-                    # Find checkboxes in this option
-                    option_checkboxes = [
-                        checkbox for checkbox in checkboxes 
-                        if self._is_contained_within(checkbox, option)
-                    ]
-                    option_checkboxes.sort(key=lambda x: float(x['y']))
-                    
-                    # Debug logging for checkboxes
-                    print(f"    Option {option_id} has {len(option_checkboxes)} checkboxes")
-                    for checkbox in option_checkboxes:
-                        print(f"      - Checkbox: {checkbox['detection_id']}")
-                    
-                    # Create checkbox option entry
-                    option_data = {
-                        'type': 'checkbox_option',
-                        'text': option_text,
-                        'confidence': option.get('confidence', 0),
-                        'detection_id': option_id,
-                        'checkboxes': []
-                    }
-                    
-                    # Add checkboxes to option
-                    for checkbox in option_checkboxes:
-                        checkbox_data = {
-                            'type': 'checkbox',
-                            'confidence': checkbox.get('confidence', 0),
-                            'detection_id': checkbox['detection_id']
-                        }
-                        option_data['checkboxes'].append(checkbox_data)
-                    
-                    # Add option to context
-                    context_data['checkbox_options'][option_id] = option_data
-                
-                # Add context to section's checkbox_contexts
-                section_data['checkbox_contexts'][context_id] = context_data
-            
-            document_structure['sections'][section_id] = section_data
         
-        # Process standalone tables (not contained within any section)
-        for table in tables:
-            table_id = table['detection_id']
-            
-            # Skip if table is already processed (contained within a section)
-            if any(table_id in section['tables'] for section in document_structure['sections'].values()):
-                continue
+        # Second pass: Process sections and their contained elements
+        sections = {}
+        for elem in sorted_elements:
+            if elem['class'] == 'section':
+                section_id = elem['detection_id']
+                section_elem = elements_map[section_id]
                 
-            table_text = table.get('text', '').strip()
-            
-            # Find fields contained within this table
-            table_fields = [
-                field for field in regular_fields 
-                if self._is_contained_within(field, table)
-            ]
-            table_fields.sort(key=lambda x: float(x['y']))
-            
-            # Create standalone table entry
-            table_data = {
-                'type': 'table',
-                'text': table_text,
-                'confidence': table.get('confidence', 0),
-                'detection_id': table_id,
-                'fields': []
-            }
-            
-            # Add fields to table
-            for field in table_fields:
-                field_data = {
-                    'type': 'field',
-                    'text': field.get('text', '').strip(),
-                    'confidence': field.get('confidence', 0),
-                    'detection_id': field['detection_id']
+                # Find fields and checkbox contexts contained within this section
+                # but not already assigned to tables
+                section_fields = []
+                section_checkbox_contexts = []
+                
+                for other_elem in sorted_elements:
+                    if other_elem['detection_id'] == section_id:
+                        continue
+                        
+                    if self._is_contained_within(other_elem, section_elem):
+                        if other_elem['class'] == 'field' and other_elem['detection_id'] not in assigned_to_tables:
+                            section_fields.append(other_elem)
+                        elif other_elem['class'] == 'checkbox_context' and other_elem['detection_id'] not in assigned_to_tables:
+                            section_checkbox_contexts.append(other_elem)
+                
+                # Create section entry with its fields, tables, and checkbox contexts
+                sections[section_id] = {
+                    'width': section_elem.get('width', 0.0),
+                    'height': section_elem.get('height', 0.0),
+                    'x': section_elem.get('x', 0.0),
+                    'y': section_elem.get('y', 0.0),
+                    'confidence': section_elem.get('confidence', 0.0),
+                    'class_id': section_elem.get('class_id', 0),
+                    'class': section_elem.get('class', ''),
+                    'detection_id': section_id,
+                    'parent_id': section_elem.get('parent_id', ''),
+                    'filename': section_elem.get('filename', ''),
+                    'text': section_elem.get('text', ''),
+                    'fields': [{
+                        'width': field.get('width', 0.0),
+                        'height': field.get('height', 0.0),
+                        'x': field.get('x', 0.0),
+                        'y': field.get('y', 0.0),
+                        'confidence': field.get('confidence', 0.0),
+                        'class_id': field.get('class_id', 0),
+                        'class': field.get('class', ''),
+                        'detection_id': field['detection_id'],
+                        'parent_id': field.get('parent_id', ''),
+                        'filename': field.get('filename', ''),
+                        'text': field.get('text', '')
+                    } for field in section_fields],
+                    'tables': {table_id: table_data for table_id, table_data in tables.items() 
+                             if self._is_contained_within(elements_map[table_id], section_elem)},
+                    'checkbox_contexts': [{
+                        'width': context.get('width', 0.0),
+                        'height': context.get('height', 0.0),
+                        'x': context.get('x', 0.0),
+                        'y': context.get('y', 0.0),
+                        'confidence': context.get('confidence', 0.0),
+                        'class_id': context.get('class_id', 0),
+                        'class': context.get('class', ''),
+                        'detection_id': context['detection_id'],
+                        'parent_id': context.get('parent_id', ''),
+                        'filename': context.get('filename', ''),
+                        'text': context.get('text', '')
+                    } for context in section_checkbox_contexts]
                 }
-                table_data['fields'].append(field_data)
-            
-            document_structure['tables'][table_id] = table_data
         
-        return document_structure
+        return sections
 
     def _enhance_structure_with_llm(self, structure: Dict, original_predictions: List[Dict]) -> Dict:
-        """Use GPT-3.5 to organize detection IDs into a logical structure."""
-        # Convert structure to a string format for the LLM
-        structure_str = json.dumps(structure, indent=2)
+        """Enhance the document structure with LLM analysis."""
+        # Create a map of all predictions for quick lookup
+        predictions_map = {pred['detection_id']: pred for pred in original_predictions}
         
-        prompt = f"""Given this document structure:
-{structure_str}
+        # Prepare the prompt for the LLM
+        prompt = """Analyze this document structure and organize the fields into their respective sections.
+For each section, include ALL field IDs in the array for their respective sections.
+Include ALL table IDs in the array for their respective sections.
+Include ALL checkbox_context IDs in the array for their respective sections.
 
-Please analyze this structure and return a JSON object that contains only the detection_ids organized in a logical hierarchy.
-The output should be a dictionary where:
-- Keys are section detection_ids
-- Values are arrays of field detection_ids that belong to that section
-- Only include relevant fields and remove any noise
-- Include all tables in the hierarchy
-- IMPORTANT: You MUST include all checkbox_context IDs in the array for their respective sections
-- For example, if a section has a checkbox_context with ID 'abc-123', that ID must be in the section's array
-- The checkbox_context IDs from the input structure are:
-  - Section c699c4ee-9652-4958-8ca7-081680a42bf5 has checkbox_context 9f3e9955-b107-46e9-96ae-05ddd38ebc10
-- a common structure is:
-  - section
-    - table
-      - field
-    - checkbox_context
-      - checkbox_option
-        - checkbox
-Return only valid JSON with detection_ids, without any additional text."""
+IMPORTANT: 
+1. Use the section IDs exactly as they appear in the input structure. Do not add any prefixes or modify the IDs.
+2. For tables, include ALL field IDs that belong to that table in the same array as the table ID.
+3. Fields that belong to a table should be included in the same array as their parent table.
 
-        response = self.client.chat.completions.create(
+The output should be a JSON object where:
+- Keys are section IDs (use them exactly as they appear in the input)
+- Values are arrays of field IDs, table IDs, and checkbox_context IDs that belong to that section
+
+Example format:
+{
+    "d0adf60d-e72b-4ac3-b3a6-770ba7fdaf79": ["field_id_1", "field_id_2", "table_id_1", "field_id_3", "field_id_4"],
+    "96088e19-833e-4ef6-95c6-7f4c653f7c38": ["field_id_5", "field_id_6", "table_id_2", "field_id_7", "field_id_8"]
+}
+
+Current document structure:
+"""
+        
+        # Add the current structure to the prompt
+        prompt += json.dumps(structure, indent=2)
+        
+        # Get LLM response
+        print("\n🔍 Raw LLM Output:")
+        llm_response = self.client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a document structure analyzer that returns only valid JSON with detection_ids. Always preserve checkbox hierarchies."},
+                {"role": "system", "content": "You are a document structure analyzer that returns only valid JSON with detection_ids. Always preserve checkbox hierarchies. Use section IDs exactly as they appear in the input. For tables, include all field IDs that belong to that table in the same array."},
                 {"role": "user", "content": prompt}
-            ],
-            temperature=0
-        )
-        print("\n🔍 Raw LLM Output:\n", response.choices[0].message.content)
-
+            ]
+        ).choices[0].message.content
+        print(llm_response)
         
         try:
-            # Get the organized detection IDs from LLM
-            detection_structure = json.loads(response.choices[0].message.content)
+            # Parse the LLM response
+            llm_structure = json.loads(llm_response)
             
-            # Rebuild the full structure using the original predictions
-            predictions_map = {p['detection_id']: p for p in original_predictions}
+            # Create enhanced structure
             enhanced_structure = {}
             
-            for section_id, field_ids in detection_structure.items():
-                if section_id not in predictions_map:
+            # Process each section
+            for section_id, element_ids in llm_structure.items():
+                if section_id not in structure:
                     continue
+                    
+                section_data = structure[section_id]
                 
-                section = predictions_map[section_id]
-                # Include all metadata from the original section
-                section_data = {
-                    'width': section.get('width', 0),
-                    'height': section.get('height', 0),
-                    'x': section.get('x', 0),
-                    'y': section.get('y', 0),
-                    'confidence': section.get('confidence', 0),
-                    'class_id': section.get('class_id', 0),
-                    'class': section.get('class', ''),
-                    'detection_id': section['detection_id'],
-                    'parent_id': section.get('parent_id', ''),
-                    'filename': section.get('filename', ''),
-                    'text': section.get('text', ''),
-                    'fields': [],
-                    'checkbox_contexts': {}
+                # Track which fields have been assigned to tables
+                fields_in_tables = set()
+                
+                # First, process tables and their fields
+                tables = {}
+                for element_id in element_ids:
+                    if element_id in predictions_map:
+                        element = predictions_map[element_id]
+                        if element['class'] == 'table':
+                            # Add table with all its metadata
+                            tables[element_id] = {
+                                'type': 'table',
+                                'text': element.get('text', ''),
+                                'confidence': element.get('confidence', 0.0),
+                                'detection_id': element_id,
+                                'fields': []
+                            }
+                            
+                            # Find fields contained within this table
+                            for field_id in element_ids:
+                                if field_id in predictions_map:
+                                    field = predictions_map[field_id]
+                                    if field['class'] == 'field' and self._is_contained_within(field, element):
+                                        tables[element_id]['fields'].append({
+                                            'type': 'field',
+                                            'text': field.get('text', ''),
+                                            'confidence': field.get('confidence', 0.0),
+                                            'detection_id': field['detection_id']
+                                        })
+                                        fields_in_tables.add(field_id)
+                
+                # Now process remaining fields and checkbox contexts
+                fields = []
+                checkbox_contexts = []
+                
+                for element_id in element_ids:
+                    if element_id in predictions_map:
+                        element = predictions_map[element_id]
+                        
+                        if element['class'] == 'field' and element_id not in fields_in_tables:
+                            # Add field with all its metadata
+                            fields.append({
+                                'width': element.get('width', 0.0),
+                                'height': element.get('height', 0.0),
+                                'x': element.get('x', 0.0),
+                                'y': element.get('y', 0.0),
+                                'confidence': element.get('confidence', 0.0),
+                                'class_id': element.get('class_id', 0),
+                                'class': element.get('class', ''),
+                                'detection_id': element_id,
+                                'parent_id': element.get('parent_id', ''),
+                                'filename': element.get('filename', ''),
+                                'text': element.get('text', '')
+                            })
+                        elif element['class'] == 'checkbox_context':
+                            # Add checkbox context with all its metadata
+                            checkbox_contexts.append({
+                                'width': element.get('width', 0.0),
+                                'height': element.get('height', 0.0),
+                                'x': element.get('x', 0.0),
+                                'y': element.get('y', 0.0),
+                                'confidence': element.get('confidence', 0.0),
+                                'class_id': element.get('class_id', 0),
+                                'class': element.get('class', ''),
+                                'detection_id': element_id,
+                                'parent_id': element.get('parent_id', ''),
+                                'filename': element.get('filename', ''),
+                                'text': element.get('text', '')
+                            })
+                
+                # Create enhanced section entry
+                enhanced_structure[section_id] = {
+                    'width': section_data.get('width', 0.0),
+                    'height': section_data.get('height', 0.0),
+                    'x': section_data.get('x', 0.0),
+                    'y': section_data.get('y', 0.0),
+                    'confidence': section_data.get('confidence', 0.0),
+                    'class_id': section_data.get('class_id', 0),
+                    'class': section_data.get('class', ''),
+                    'detection_id': section_id,
+                    'parent_id': section_data.get('parent_id', ''),
+                    'filename': section_data.get('filename', ''),
+                    'text': section_data.get('text', ''),
+                    'fields': fields,
+                    'tables': tables,
+                    'checkbox_contexts': checkbox_contexts
                 }
-                
-                # First, preserve any existing checkbox_contexts from the original structure
-                if section_id in structure['sections']:
-                    section_data['checkbox_contexts'] = structure['sections'][section_id].get('checkbox_contexts', {})
-                
-                # Add fields based on the LLM-organized structure
-                for field_id in field_ids:
-                    if field_id in predictions_map:
-                        field = predictions_map[field_id]
-                        
-                        # Skip checkbox-related elements since they'll be handled in the checkbox_contexts hierarchy
-                        if field.get('class') in ['checkbox_context', 'checkbox_option', 'checkbox']:
-                            continue
-                        
-                        # Regular field
-                        field_data = {
-                            'width': field.get('width', 0),
-                            'height': field.get('height', 0),
-                            'x': field.get('x', 0),
-                            'y': field.get('y', 0),
-                            'confidence': field.get('confidence', 0),
-                            'class_id': field.get('class_id', 0),
-                            'class': field.get('class', ''),
-                            'detection_id': field['detection_id'],
-                            'parent_id': field.get('parent_id', ''),
-                            'filename': field.get('filename', ''),
-                            'text': field.get('text', '')
-                        }
-                        section_data['fields'].append(field_data)
-                
-                enhanced_structure[section_id] = section_data
             
             return enhanced_structure
-        except json.JSONDecodeError:
-            print("⚠️ LLM returned invalid JSON, using original structure")
+            
+        except json.JSONDecodeError as e:
+            print(f"Error parsing LLM response: {e}")
             return structure
 
     def process(self, predictions_file: str, output_file: str):
