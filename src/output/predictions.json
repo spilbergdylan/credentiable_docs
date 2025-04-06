@@ -1,0 +1,848 @@
+[
+  {
+    "width": 486.0,
+    "height": 152.0,
+    "x": 266.0,
+    "y": 468.0,
+    "confidence": 0.9414640665054321,
+    "class_id": 4,
+    "class": "section",
+<<<<<<< HEAD
+    "detection_id": "f34c907d-c1fb-42e0-b52f-82be417162df",
+    "parent_id": "image",
+    "filename": "section_f34c907d-c1fb-42e0-b52f-82be417162df.png"
+=======
+    "detection_id": "34e2ef68-6f95-409f-9e5a-68c81cb8e671",
+    "parent_id": "image",
+    "filename": "section_34e2ef68-6f95-409f-9e5a-68c81cb8e671.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 188.0,
+    "height": 23.0,
+    "x": 411.0,
+    "y": 54.5,
+    "confidence": 0.9240146279335022,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "c042048c-0b49-48db-8ca6-30498cbfd2fe",
+    "parent_id": "image",
+    "filename": "field_c042048c-0b49-48db-8ca6-30498cbfd2fe.png"
+=======
+    "detection_id": "1c7703a9-fda7-42fa-a0b7-8716bd4ba9e2",
+    "parent_id": "image",
+    "filename": "field_1c7703a9-fda7-42fa-a0b7-8716bd4ba9e2.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 486.0,
+    "height": 96.0,
+    "x": 266.0,
+    "y": 336.0,
+    "confidence": 0.9215313196182251,
+    "class_id": 4,
+    "class": "section",
+<<<<<<< HEAD
+    "detection_id": "73e43de0-7560-49c2-85a1-4f94f1b5966e",
+    "parent_id": "image",
+    "filename": "section_73e43de0-7560-49c2-85a1-4f94f1b5966e.png"
+=======
+    "detection_id": "836eafa1-6250-459e-b37d-7df5c754a462",
+    "parent_id": "image",
+    "filename": "section_836eafa1-6250-459e-b37d-7df5c754a462.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 483.0,
+    "height": 112.0,
+    "x": 264.5,
+    "y": 225.0,
+    "confidence": 0.9208617210388184,
+    "class_id": 4,
+    "class": "section",
+<<<<<<< HEAD
+    "detection_id": "f9c23176-b5a2-49e0-9718-1b09925e2469",
+    "parent_id": "image",
+    "filename": "section_f9c23176-b5a2-49e0-9718-1b09925e2469.png"
+=======
+    "detection_id": "c8e371d8-45e0-4d92-a3b7-fdfce7828e45",
+    "parent_id": "image",
+    "filename": "section_c8e371d8-45e0-4d92-a3b7-fdfce7828e45.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 187.0,
+    "height": 24.0,
+    "x": 411.5,
+    "y": 75.0,
+    "confidence": 0.9187047481536865,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "1ae354c5-1c68-4d7f-a0f0-94f2a8b2cc92",
+    "parent_id": "image",
+    "filename": "field_1ae354c5-1c68-4d7f-a0f0-94f2a8b2cc92.png"
+=======
+    "detection_id": "77749f48-4cd3-4c22-8f8c-c5261c4b420d",
+    "parent_id": "image",
+    "filename": "field_77749f48-4cd3-4c22-8f8c-c5261c4b420d.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 219.0,
+    "height": 25.0,
+    "x": 131.5,
+    "y": 75.5,
+    "confidence": 0.915319561958313,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "73972ea8-df9a-4063-81b9-cbb8cd1f0771",
+    "parent_id": "image",
+    "filename": "field_73972ea8-df9a-4063-81b9-cbb8cd1f0771.png"
+=======
+    "detection_id": "8fa4fa20-0209-4b98-8d08-abb3dca60739",
+    "parent_id": "image",
+    "filename": "field_8fa4fa20-0209-4b98-8d08-abb3dca60739.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 484.0,
+    "height": 82.0,
+    "x": 265.0,
+    "y": 593.0,
+    "confidence": 0.9108333587646484,
+    "class_id": 4,
+    "class": "section",
+<<<<<<< HEAD
+    "detection_id": "d2fa673c-0212-48d0-a250-8776a1fb53b1",
+    "parent_id": "image",
+    "filename": "section_d2fa673c-0212-48d0-a250-8776a1fb53b1.png"
+=======
+    "detection_id": "5e3c7fd1-4bf3-4973-b717-4d035ff60146",
+    "parent_id": "image",
+    "filename": "section_5e3c7fd1-4bf3-4973-b717-4d035ff60146.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 164.0,
+    "height": 20.0,
+    "x": 424.0,
+    "y": 418.0,
+    "confidence": 0.9031176567077637,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "de51a05e-ea69-469b-8eac-2dffa1412e06",
+    "parent_id": "image",
+    "filename": "field_de51a05e-ea69-469b-8eac-2dffa1412e06.png"
+=======
+    "detection_id": "8ca5c16a-8ae6-474f-b347-b51264e2265d",
+    "parent_id": "image",
+    "filename": "field_8ca5c16a-8ae6-474f-b347-b51264e2265d.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 248.0,
+    "height": 22.0,
+    "x": 381.0,
+    "y": 333.0,
+    "confidence": 0.9029218554496765,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "a209cd41-8ef1-4396-a832-7474ed20b4e6",
+    "parent_id": "image",
+    "filename": "field_a209cd41-8ef1-4396-a832-7474ed20b4e6.png"
+=======
+    "detection_id": "f0601ab7-76bf-4d8c-bc44-b4437648bf90",
+    "parent_id": "image",
+    "filename": "field_f0601ab7-76bf-4d8c-bc44-b4437648bf90.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 160.0,
+    "height": 21.0,
+    "x": 425.0,
+    "y": 515.5,
+    "confidence": 0.9005446434020996,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "2fd8f8d2-cb66-41ee-ac3d-1b28ce2a8ddc",
+    "parent_id": "image",
+    "filename": "field_2fd8f8d2-cb66-41ee-ac3d-1b28ce2a8ddc.png"
+=======
+    "detection_id": "113829a6-eff4-470b-8bda-a6f9762d9a13",
+    "parent_id": "image",
+    "filename": "field_113829a6-eff4-470b-8bda-a6f9762d9a13.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 240.0,
+    "height": 23.0,
+    "x": 141.0,
+    "y": 372.5,
+    "confidence": 0.8993714451789856,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "aaeb86fe-e575-4257-b31f-3f90da8eea36",
+    "parent_id": "image",
+    "filename": "field_aaeb86fe-e575-4257-b31f-3f90da8eea36.png"
+=======
+    "detection_id": "3cd316f6-dacf-4c4f-ad4f-f06ac9f20d83",
+    "parent_id": "image",
+    "filename": "field_3cd316f6-dacf-4c4f-ad4f-f06ac9f20d83.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 161.0,
+    "height": 22.0,
+    "x": 424.5,
+    "y": 496.0,
+    "confidence": 0.8988292217254639,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "21655df0-1f85-4645-bf93-fb428d49ce81",
+    "parent_id": "image",
+    "filename": "field_21655df0-1f85-4645-bf93-fb428d49ce81.png"
+=======
+    "detection_id": "4393fdae-7ed7-4659-bf72-a6f2568413c9",
+    "parent_id": "image",
+    "filename": "field_4393fdae-7ed7-4659-bf72-a6f2568413c9.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 162.0,
+    "height": 22.0,
+    "x": 424.0,
+    "y": 438.0,
+    "confidence": 0.8973655700683594,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "692102f5-17c9-4cf4-94e9-cc649f8f225b",
+    "parent_id": "image",
+    "filename": "field_692102f5-17c9-4cf4-94e9-cc649f8f225b.png"
+=======
+    "detection_id": "b22a9780-29b7-40b7-9d92-e504fcf2c485",
+    "parent_id": "image",
+    "filename": "field_b22a9780-29b7-40b7-9d92-e504fcf2c485.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 82.0,
+    "height": 22.0,
+    "x": 279.0,
+    "y": 75.0,
+    "confidence": 0.8947384357452393,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "347b6638-24e0-4d30-b23f-600e6cc6bb8c",
+    "parent_id": "image",
+    "filename": "field_347b6638-24e0-4d30-b23f-600e6cc6bb8c.png"
+=======
+    "detection_id": "0f045a5d-3a6d-4ad2-b562-fdec7803ac2d",
+    "parent_id": "image",
+    "filename": "field_0f045a5d-3a6d-4ad2-b562-fdec7803ac2d.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 160.0,
+    "height": 21.0,
+    "x": 104.0,
+    "y": 476.5,
+    "confidence": 0.8939717411994934,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "3e68975c-fca1-445e-be1e-5ae7c4ed24e1",
+    "parent_id": "image",
+    "filename": "field_3e68975c-fca1-445e-be1e-5ae7c4ed24e1.png"
+=======
+    "detection_id": "00466e94-1c12-4a34-8fd3-f89437b7b1e7",
+    "parent_id": "image",
+    "filename": "field_00466e94-1c12-4a34-8fd3-f89437b7b1e7.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 163.0,
+    "height": 22.0,
+    "x": 423.5,
+    "y": 476.0,
+    "confidence": 0.8938654065132141,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "ab38d329-fe05-47af-adf0-f3f2d1a290a5",
+    "parent_id": "image",
+    "filename": "field_ab38d329-fe05-47af-adf0-f3f2d1a290a5.png"
+=======
+    "detection_id": "5ad71b51-8295-48ee-b3a9-ea71a85c4f20",
+    "parent_id": "image",
+    "filename": "field_5ad71b51-8295-48ee-b3a9-ea71a85c4f20.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 162.0,
+    "height": 23.0,
+    "x": 104.0,
+    "y": 495.5,
+    "confidence": 0.89200359582901,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "002fba56-8962-42c0-b7bc-b847c48bcbfe",
+    "parent_id": "image",
+    "filename": "field_002fba56-8962-42c0-b7bc-b847c48bcbfe.png"
+=======
+    "detection_id": "50ebe8e5-8cf0-4751-9fd3-4109f1b2374a",
+    "parent_id": "image",
+    "filename": "field_50ebe8e5-8cf0-4751-9fd3-4109f1b2374a.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 162.0,
+    "height": 22.0,
+    "x": 104.0,
+    "y": 515.0,
+    "confidence": 0.8903120160102844,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "fb5ebc07-3c19-44e1-beb7-a28eb20c24ad",
+    "parent_id": "image",
+    "filename": "field_fb5ebc07-3c19-44e1-beb7-a28eb20c24ad.png"
+=======
+    "detection_id": "f614dbaf-b8a8-4cbe-8208-9f8af6ebe3ee",
+    "parent_id": "image",
+    "filename": "field_f614dbaf-b8a8-4cbe-8208-9f8af6ebe3ee.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 242.0,
+    "height": 22.0,
+    "x": 143.0,
+    "y": 457.0,
+    "confidence": 0.8900574445724487,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "c99fe6cc-93e2-4bcd-837d-aba52f772f9e",
+    "parent_id": "image",
+    "filename": "field_c99fe6cc-93e2-4bcd-837d-aba52f772f9e.png"
+=======
+    "detection_id": "942d387a-68ce-4962-82b6-4e6533a4a645",
+    "parent_id": "image",
+    "filename": "field_942d387a-68ce-4962-82b6-4e6533a4a645.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 239.0,
+    "height": 22.0,
+    "x": 141.5,
+    "y": 333.0,
+    "confidence": 0.8897994756698608,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "383c3d86-78ca-4845-ae19-257745d02320",
+    "parent_id": "image",
+    "filename": "field_383c3d86-78ca-4845-ae19-257745d02320.png"
+=======
+    "detection_id": "39e16b3b-0f46-4bc5-bc73-da5e849e3040",
+    "parent_id": "image",
+    "filename": "field_39e16b3b-0f46-4bc5-bc73-da5e849e3040.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 83.0,
+    "height": 21.0,
+    "x": 303.5,
+    "y": 437.5,
+    "confidence": 0.8882983922958374,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "e9de7ecc-cf94-4b6b-a791-1a732923e869",
+    "parent_id": "image",
+    "filename": "field_e9de7ecc-cf94-4b6b-a791-1a732923e869.png"
+=======
+    "detection_id": "7d30ded6-808f-42d8-a73e-9c7dad5be739",
+    "parent_id": "image",
+    "filename": "field_7d30ded6-808f-42d8-a73e-9c7dad5be739.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 247.0,
+    "height": 22.0,
+    "x": 381.5,
+    "y": 353.0,
+    "confidence": 0.8878443241119385,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "9013f1bb-2515-43f2-a763-93bfb71553dc",
+    "parent_id": "image",
+    "filename": "field_9013f1bb-2515-43f2-a763-93bfb71553dc.png"
+=======
+    "detection_id": "db8e51db-bed5-4d86-a9c4-736335bcd5e4",
+    "parent_id": "image",
+    "filename": "field_db8e51db-bed5-4d86-a9c4-736335bcd5e4.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 161.0,
+    "height": 22.0,
+    "x": 263.5,
+    "y": 516.0,
+    "confidence": 0.8869625329971313,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "f698e12b-2282-42ac-ac5a-bd07bb72606b",
+    "parent_id": "image",
+    "filename": "field_f698e12b-2282-42ac-ac5a-bd07bb72606b.png"
+=======
+    "detection_id": "04db0e6e-17d2-4aa3-b8d7-0d30ed2025d5",
+    "parent_id": "image",
+    "filename": "field_04db0e6e-17d2-4aa3-b8d7-0d30ed2025d5.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 246.0,
+    "height": 22.0,
+    "x": 382.0,
+    "y": 373.0,
+    "confidence": 0.8859270215034485,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "c855e13a-57e1-4a17-9f3e-6d870339996d",
+    "parent_id": "image",
+    "filename": "field_c855e13a-57e1-4a17-9f3e-6d870339996d.png"
+=======
+    "detection_id": "6c64b637-5dae-495f-9a83-ce8228af7e14",
+    "parent_id": "image",
+    "filename": "field_6c64b637-5dae-495f-9a83-ce8228af7e14.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 162.0,
+    "height": 23.0,
+    "x": 264.0,
+    "y": 476.5,
+    "confidence": 0.8837640881538391,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "0b6e1daf-8949-49f7-a024-90fc2d06becc",
+    "parent_id": "image",
+    "filename": "field_0b6e1daf-8949-49f7-a024-90fc2d06becc.png"
+=======
+    "detection_id": "3eb29445-a205-489a-b779-11fec1db1408",
+    "parent_id": "image",
+    "filename": "field_3eb29445-a205-489a-b779-11fec1db1408.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 243.0,
+    "height": 23.0,
+    "x": 383.5,
+    "y": 456.5,
+    "confidence": 0.8830446600914001,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "613b3789-ed92-41fa-b4ca-f5d288f274df",
+    "parent_id": "image",
+    "filename": "field_613b3789-ed92-41fa-b4ca-f5d288f274df.png"
+=======
+    "detection_id": "147a875c-2e98-4269-88f6-703da599f9da",
+    "parent_id": "image",
+    "filename": "field_147a875c-2e98-4269-88f6-703da599f9da.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 239.0,
+    "height": 22.0,
+    "x": 141.5,
+    "y": 353.0,
+    "confidence": 0.8827803134918213,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "48ff0d87-5be8-4898-b375-f1d7033e2f1b",
+    "parent_id": "image",
+    "filename": "field_48ff0d87-5be8-4898-b375-f1d7033e2f1b.png"
+=======
+    "detection_id": "312567c1-a11f-46f5-98d7-455cf4d224e4",
+    "parent_id": "image",
+    "filename": "field_312567c1-a11f-46f5-98d7-455cf4d224e4.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 161.0,
+    "height": 19.0,
+    "x": 103.5,
+    "y": 418.5,
+    "confidence": 0.8821040391921997,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "f5ce07e3-a71f-4878-904a-33ff6b5ec346",
+    "parent_id": "image",
+    "filename": "field_f5ce07e3-a71f-4878-904a-33ff6b5ec346.png"
+=======
+    "detection_id": "12511c23-f33e-4768-b045-0cba17865b10",
+    "parent_id": "image",
+    "filename": "field_12511c23-f33e-4768-b045-0cba17865b10.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 213.0,
+    "height": 21.0,
+    "x": 128.5,
+    "y": 251.5,
+    "confidence": 0.8818262219429016,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "7f5f8944-a00f-4811-9edf-652752af4adc",
+    "parent_id": "image",
+    "filename": "field_7f5f8944-a00f-4811-9edf-652752af4adc.png"
+=======
+    "detection_id": "4eab8c89-6217-4c66-8f60-a6b54fd2fb77",
+    "parent_id": "image",
+    "filename": "field_4eab8c89-6217-4c66-8f60-a6b54fd2fb77.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 161.0,
+    "height": 21.0,
+    "x": 263.5,
+    "y": 417.5,
+    "confidence": 0.8758809566497803,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "07f066c4-3f32-4ac5-be2b-af30f985948c",
+    "parent_id": "image",
+    "filename": "field_07f066c4-3f32-4ac5-be2b-af30f985948c.png"
+=======
+    "detection_id": "bf724290-5091-4458-8757-7491cc31d42f",
+    "parent_id": "image",
+    "filename": "field_bf724290-5091-4458-8757-7491cc31d42f.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 243.0,
+    "height": 22.0,
+    "x": 143.5,
+    "y": 437.0,
+    "confidence": 0.8630123138427734,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "ba7dd42f-3d0b-44fa-b9bf-332e067d9cd0",
+    "parent_id": "image",
+    "filename": "field_ba7dd42f-3d0b-44fa-b9bf-332e067d9cd0.png"
+=======
+    "detection_id": "e1d6cc5c-43dd-4311-afe6-4404e262b0a2",
+    "parent_id": "image",
+    "filename": "field_e1d6cc5c-43dd-4311-afe6-4404e262b0a2.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 475.0,
+    "height": 59.0,
+    "x": 267.5,
+    "y": 56.5,
+    "confidence": 0.8621230125427246,
+    "class_id": 4,
+    "class": "section",
+<<<<<<< HEAD
+    "detection_id": "68c81fda-cbde-4686-8331-3b5d96faba85",
+    "parent_id": "image",
+    "filename": "section_68c81fda-cbde-4686-8331-3b5d96faba85.png"
+=======
+    "detection_id": "9a9777d4-1a58-4fbd-9350-e6efac46a264",
+    "parent_id": "image",
+    "filename": "section_9a9777d4-1a58-4fbd-9350-e6efac46a264.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 139.0,
+    "height": 19.0,
+    "x": 300.5,
+    "y": 251.5,
+    "confidence": 0.8610302805900574,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "3f866fc5-3957-4c99-a569-923ef44f4968",
+    "parent_id": "image",
+    "filename": "field_3f866fc5-3957-4c99-a569-923ef44f4968.png"
+=======
+    "detection_id": "6c2d4dac-36a8-4f6e-b839-3eb5fe772322",
+    "parent_id": "image",
+    "filename": "field_6c2d4dac-36a8-4f6e-b839-3eb5fe772322.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 137.0,
+    "height": 20.0,
+    "x": 435.5,
+    "y": 252.0,
+    "confidence": 0.8541287779808044,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "12e7c926-d7fa-4d2a-abd5-5cf01e5e726a",
+    "parent_id": "image",
+    "filename": "field_12e7c926-d7fa-4d2a-abd5-5cf01e5e726a.png"
+=======
+    "detection_id": "368fb994-7a33-4d17-87ca-47ec132bce31",
+    "parent_id": "image",
+    "filename": "field_368fb994-7a33-4d17-87ca-47ec132bce31.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 477.0,
+    "height": 19.0,
+    "x": 266.5,
+    "y": 314.5,
+    "confidence": 0.8442242741584778,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "714993fa-7081-4311-bffb-2358af0215a4",
+    "parent_id": "image",
+    "filename": "field_714993fa-7081-4311-bffb-2358af0215a4.png"
+=======
+    "detection_id": "62c50ad7-59c0-4c22-bafb-f745dda6162a",
+    "parent_id": "image",
+    "filename": "field_62c50ad7-59c0-4c22-bafb-f745dda6162a.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 466.0,
+    "height": 28.0,
+    "x": 268.0,
+    "y": 598.0,
+    "confidence": 0.8348212838172913,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "30530c6b-2cfe-4e96-bb64-0b9377907e46",
+    "parent_id": "image",
+    "filename": "field_30530c6b-2cfe-4e96-bb64-0b9377907e46.png"
+=======
+    "detection_id": "9572cb51-627e-4a15-b71e-db513e4d99b3",
+    "parent_id": "image",
+    "filename": "field_9572cb51-627e-4a15-b71e-db513e4d99b3.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 163.0,
+    "height": 20.0,
+    "x": 264.5,
+    "y": 496.0,
+    "confidence": 0.8271684646606445,
+    "class_id": 1,
+    "class": "checkbox_context",
+<<<<<<< HEAD
+    "detection_id": "655f3232-bf58-4364-b4ef-c678e8551846",
+    "parent_id": "image",
+    "filename": "checkbox_context_655f3232-bf58-4364-b4ef-c678e8551846.png"
+=======
+    "detection_id": "343defd6-2afa-4ec2-a305-e6dbc77b3b8c",
+    "parent_id": "image",
+    "filename": "checkbox_context_343defd6-2afa-4ec2-a305-e6dbc77b3b8c.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 475.0,
+    "height": 18.0,
+    "x": 266.5,
+    "y": 213.0,
+    "confidence": 0.8023363351821899,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "8d88312e-de55-4f44-bfc1-44524ab2e375",
+    "parent_id": "image",
+    "filename": "field_8d88312e-de55-4f44-bfc1-44524ab2e375.png"
+=======
+    "detection_id": "7b10c67a-663a-4d6d-aa55-46ace1fc523b",
+    "parent_id": "image",
+    "filename": "field_7b10c67a-663a-4d6d-aa55-46ace1fc523b.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 8.0,
+    "height": 6.0,
+    "x": 32.0,
+    "y": 267.0,
+    "confidence": 0.7966679334640503,
+    "class_id": 0,
+    "class": "checkbox",
+<<<<<<< HEAD
+    "detection_id": "4888e462-6e6f-45db-8d38-409566632ac4",
+    "parent_id": "image",
+    "filename": "checkbox_4888e462-6e6f-45db-8d38-409566632ac4.png"
+=======
+    "detection_id": "c7e123bf-6f0e-4710-9cf3-2c54dd6cb356",
+    "parent_id": "image",
+    "filename": "checkbox_c7e123bf-6f0e-4710-9cf3-2c54dd6cb356.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 475.0,
+    "height": 20.0,
+    "x": 266.5,
+    "y": 533.0,
+    "confidence": 0.7752701044082642,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "2064c976-2ee0-4f36-8d46-8dfef58d21f3",
+    "parent_id": "image",
+    "filename": "field_2064c976-2ee0-4f36-8d46-8dfef58d21f3.png"
+=======
+    "detection_id": "31040a73-27f6-4e99-b37d-5bcd1d3025ac",
+    "parent_id": "image",
+    "filename": "field_31040a73-27f6-4e99-b37d-5bcd1d3025ac.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 43.0,
+    "height": 13.0,
+    "x": 232.5,
+    "y": 499.5,
+    "confidence": 0.7579233646392822,
+    "class_id": 2,
+    "class": "checkbox_option",
+<<<<<<< HEAD
+    "detection_id": "36aa34ed-0de3-4960-98df-eb0efa38987e",
+    "parent_id": "image",
+    "filename": "checkbox_option_36aa34ed-0de3-4960-98df-eb0efa38987e.png"
+=======
+    "detection_id": "de897c99-866b-4efe-a63c-56fb2a365dd6",
+    "parent_id": "image",
+    "filename": "checkbox_option_de897c99-866b-4efe-a63c-56fb2a365dd6.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 58.0,
+    "height": 13.0,
+    "x": 298.0,
+    "y": 500.5,
+    "confidence": 0.7466632127761841,
+    "class_id": 2,
+    "class": "checkbox_option",
+<<<<<<< HEAD
+    "detection_id": "d8c0fb34-32fd-452c-83dd-f7314ab1c2f3",
+    "parent_id": "image",
+    "filename": "checkbox_option_d8c0fb34-32fd-452c-83dd-f7314ab1c2f3.png"
+=======
+    "detection_id": "c30a8f21-d1fe-4162-9713-7e287789171a",
+    "parent_id": "image",
+    "filename": "checkbox_option_c30a8f21-d1fe-4162-9713-7e287789171a.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 315.0,
+    "height": 15.0,
+    "x": 179.5,
+    "y": 267.5,
+    "confidence": 0.7318412065505981,
+    "class_id": 2,
+    "class": "checkbox_option",
+<<<<<<< HEAD
+    "detection_id": "9607d810-b30f-484d-aa79-9406085570ed",
+    "parent_id": "image",
+    "filename": "checkbox_option_9607d810-b30f-484d-aa79-9406085570ed.png"
+=======
+    "detection_id": "a30126c8-b493-46cb-9f65-2ddc7479a272",
+    "parent_id": "image",
+    "filename": "checkbox_option_a30126c8-b493-46cb-9f65-2ddc7479a272.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 204.0,
+    "height": 18.0,
+    "x": 127.0,
+    "y": 656.0,
+    "confidence": 0.7261167764663696,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "babec53a-1939-42bb-8d94-a8693409bf95",
+    "parent_id": "image",
+    "filename": "field_babec53a-1939-42bb-8d94-a8693409bf95.png"
+=======
+    "detection_id": "6ec1e478-492e-4dd6-92e5-6de41a060c79",
+    "parent_id": "image",
+    "filename": "field_6ec1e478-492e-4dd6-92e5-6de41a060c79.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 387.0,
+    "height": 20.0,
+    "x": 305.5,
+    "y": 232.0,
+    "confidence": 0.579089879989624,
+    "class_id": 3,
+    "class": "field",
+<<<<<<< HEAD
+    "detection_id": "51c251ae-146e-4416-9660-bec9624ee4c9",
+    "parent_id": "image",
+    "filename": "field_51c251ae-146e-4416-9660-bec9624ee4c9.png"
+=======
+    "detection_id": "65087149-a56d-4771-b320-ecfdea779ee5",
+    "parent_id": "image",
+    "filename": "field_65087149-a56d-4771-b320-ecfdea779ee5.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 9.0,
+    "height": 9.0,
+    "x": 220.5,
+    "y": 500.5,
+    "confidence": 0.5608228445053101,
+    "class_id": 0,
+    "class": "checkbox",
+<<<<<<< HEAD
+    "detection_id": "08d46d16-25f2-4f9e-9353-4a120b8023df",
+    "parent_id": "image",
+    "filename": "checkbox_08d46d16-25f2-4f9e-9353-4a120b8023df.png"
+=======
+    "detection_id": "961b26ef-6319-4a5a-a1da-bcc38833a86d",
+    "parent_id": "image",
+    "filename": "checkbox_961b26ef-6319-4a5a-a1da-bcc38833a86d.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  },
+  {
+    "width": 9.0,
+    "height": 9.0,
+    "x": 277.5,
+    "y": 500.5,
+    "confidence": 0.42885395884513855,
+    "class_id": 0,
+    "class": "checkbox",
+<<<<<<< HEAD
+    "detection_id": "93d1c2b9-f966-4eaa-87a2-98eb8a059498",
+    "parent_id": "image",
+    "filename": "checkbox_93d1c2b9-f966-4eaa-87a2-98eb8a059498.png"
+=======
+    "detection_id": "32dcb321-b359-4301-837b-54fdaad8711b",
+    "parent_id": "image",
+    "filename": "checkbox_32dcb321-b359-4301-837b-54fdaad8711b.png"
+>>>>>>> 40efb5b9 (Fresh start: Remove virtual environment and large files from history)
+  }
+]
