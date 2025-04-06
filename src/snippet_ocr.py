@@ -116,9 +116,9 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--snippets", default="../snippets", help="Directory of snippet images")
-    parser.add_argument("--predictions", default="output/predictions.json", help="Original predictions JSON file")
-    parser.add_argument("--output", default="output/ocr_enriched_predictions.json", help="Path to save enriched predictions")
+    parser.add_argument("--snippets", default="snippets", help="Directory of snippet images")
+    parser.add_argument("--predictions", default="./output/predictions.json", help="Original predictions JSON file")
+    parser.add_argument("--output", default="./output/ocr_enriched_predictions.json", help="Path to save enriched predictions")
     args = parser.parse_args()
 
     with open(args.predictions, "r", encoding="utf-8") as f:

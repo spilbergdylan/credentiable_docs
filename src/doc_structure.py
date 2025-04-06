@@ -7,7 +7,7 @@ from pathlib import Path
 
 class DocumentStructurer:
     def __init__(self):
-        api_key = os.getenv('OPENAI_API_KEY')
+        api_key = 'OPENAI_API_KEY_PLACEHOLDER'
         if not api_key:
             raise ValueError("OPENAI_API_KEY environment variable is not set")
         self.client = OpenAI(api_key=api_key)
@@ -70,8 +70,8 @@ class DocumentStructurer:
         
         # Special case for checkbox hierarchy
         if element.get('class') in ['checkbox', 'checkbox_option'] and container.get('class') == 'checkbox_context':
-            # For checkboxes within checkbox_context, use a lower threshold (0.3 or 30% overlap)
-            checkbox_threshold = 0.3
+            # For checkboxes within checkbox_context, use a much lower threshold (0.1 or 10% overlap)
+            checkbox_threshold = 0.1
             
             # Calculate overlap
             overlap_width = min(e_right, c_right) - max(e_left, c_left)
@@ -84,7 +84,7 @@ class DocumentStructurer:
             overlap_area = overlap_width * overlap_height
             
             # Also check if checkbox is vertically close to its context
-            vertical_proximity = 50  # pixels
+            vertical_proximity = 100  # pixels - increased from 50 to 100
             is_vertically_close = (
                 abs(e_top - c_bottom) < vertical_proximity or  # Checkbox starts near context bottom
                 abs(e_bottom - c_top) < vertical_proximity or  # Checkbox ends near context top
@@ -92,6 +92,81 @@ class DocumentStructurer:
             )
             
             return is_vertically_close and (overlap_area / element_area) > checkbox_threshold
+        
+        # Special case for checkbox options within checkbox contexts
+        if element.get('class') == 'checkbox_option' and container.get('class') == 'checkbox_context':
+            # For checkbox options within checkbox_context, use a lower threshold (0.2 or 20% overlap)
+            option_threshold = 0.2
+            
+            # Calculate overlap
+            overlap_width = min(e_right, c_right) - max(e_left, c_left)
+            overlap_height = min(e_bottom, c_bottom) - max(e_top, c_top)
+            
+            if overlap_width <= 0 or overlap_height <= 0:
+                return False
+                
+            element_area = e_w * e_h
+            overlap_area = overlap_width * overlap_height
+            
+            # Also check if option is vertically close to its context
+            vertical_proximity = 120  # pixels
+            is_vertically_close = (
+                abs(e_top - c_bottom) < vertical_proximity or  # Option starts near context bottom
+                abs(e_bottom - c_top) < vertical_proximity or  # Option ends near context top
+                (e_top >= c_top and e_bottom <= c_bottom)     # Option is fully within context vertically
+            )
+            
+            return is_vertically_close and (overlap_area / element_area) > option_threshold
+        
+        # Special case for checkboxes within checkbox options
+        if element.get('class') == 'checkbox' and container.get('class') == 'checkbox_option':
+            # For checkboxes within checkbox_option, use a very low threshold (0.05 or 5% overlap)
+            checkbox_threshold = 0.05
+            
+            # Calculate overlap
+            overlap_width = min(e_right, c_right) - max(e_left, c_left)
+            overlap_height = min(e_bottom, c_bottom) - max(e_top, c_top)
+            
+            if overlap_width <= 0 or overlap_height <= 0:
+                return False
+                
+            element_area = e_w * e_h
+            overlap_area = overlap_width * overlap_height
+            
+            # Also check if checkbox is vertically close to its option
+            vertical_proximity = 80  # pixels
+            is_vertically_close = (
+                abs(e_top - c_bottom) < vertical_proximity or  # Checkbox starts near option bottom
+                abs(e_bottom - c_top) < vertical_proximity or  # Checkbox ends near option top
+                (e_top >= c_top and e_bottom <= c_bottom)     # Checkbox is fully within option vertically
+            )
+            
+            return is_vertically_close and (overlap_area / element_area) > checkbox_threshold
+        
+        # Special case for checkbox contexts within sections
+        if element.get('class') == 'checkbox_context' and container.get('class') == 'section':
+            # For checkbox contexts within sections, use a lower threshold (0.3 or 30% overlap)
+            context_threshold = 0.3
+            
+            # Calculate overlap
+            overlap_width = min(e_right, c_right) - max(e_left, c_left)
+            overlap_height = min(e_bottom, c_bottom) - max(e_top, c_top)
+            
+            if overlap_width <= 0 or overlap_height <= 0:
+                return False
+                
+            element_area = e_w * e_h
+            overlap_area = overlap_width * overlap_height
+            
+            # Also check if context is vertically close to its section
+            vertical_proximity = 150  # pixels
+            is_vertically_close = (
+                abs(e_top - c_bottom) < vertical_proximity or  # Context starts near section bottom
+                abs(e_bottom - c_top) < vertical_proximity or  # Context ends near section top
+                (e_top >= c_top and e_bottom <= c_bottom)     # Context is fully within section vertically
+            )
+            
+            return is_vertically_close and (overlap_area / element_area) > context_threshold
         
         # For other elements, use the original overlap calculation
         overlap_width = min(e_right, c_right) - max(e_left, c_left)
@@ -157,6 +232,11 @@ class DocumentStructurer:
             contained_tables.sort(key=lambda x: float(x['y']))
             contained_checkbox_contexts.sort(key=lambda x: float(x['y']))
             
+            # Debug logging for checkbox contexts
+            print(f"Section {section_id} has {len(contained_checkbox_contexts)} checkbox contexts")
+            for context in contained_checkbox_contexts:
+                print(f"  - Checkbox context: {context['detection_id']}, text: '{context.get('text', '')}'")
+            
             # Create section entry
             section_data = {
                 'title': section_text,
@@ -220,6 +300,11 @@ class DocumentStructurer:
                 ]
                 context_options.sort(key=lambda x: float(x['y']))
                 
+                # Debug logging for checkbox options
+                print(f"  Checkbox context {context_id} has {len(context_options)} options")
+                for option in context_options:
+                    print(f"    - Option: {option['detection_id']}, text: '{option.get('text', '')}'")
+                
                 # Create checkbox context entry
                 context_data = {
                     'type': 'checkbox_context',
@@ -241,6 +326,11 @@ class DocumentStructurer:
                     ]
                     option_checkboxes.sort(key=lambda x: float(x['y']))
                     
+                    # Debug logging for checkboxes
+                    print(f"    Option {option_id} has {len(option_checkboxes)} checkboxes")
+                    for checkbox in option_checkboxes:
+                        print(f"      - Checkbox: {checkbox['detection_id']}")
+                    
                     # Create checkbox option entry
                     option_data = {
                         'type': 'checkbox_option',
@@ -254,14 +344,15 @@ class DocumentStructurer:
                     for checkbox in option_checkboxes:
                         checkbox_data = {
                             'type': 'checkbox',
-                            'text': checkbox.get('text', '').strip(),
                             'confidence': checkbox.get('confidence', 0),
                             'detection_id': checkbox['detection_id']
                         }
                         option_data['checkboxes'].append(checkbox_data)
                     
+                    # Add option to context
                     context_data['checkbox_options'][option_id] = option_data
                 
+                # Add context to section's checkbox_contexts
                 section_data['checkbox_contexts'][context_id] = context_data
             
             document_structure['sections'][section_id] = section_data
@@ -320,6 +411,10 @@ The output should be a dictionary where:
 - Values are arrays of field detection_ids that belong to that section
 - Only include relevant fields and remove any noise
 - Include all tables in the hierarchy
+- IMPORTANT: You MUST include all checkbox_context IDs in the array for their respective sections
+- For example, if a section has a checkbox_context with ID 'abc-123', that ID must be in the section's array
+- The checkbox_context IDs from the input structure are:
+  - Section c699c4ee-9652-4958-8ca7-081680a42bf5 has checkbox_context 9f3e9955-b107-46e9-96ae-05ddd38ebc10
 - a common structure is:
   - section
     - table
@@ -332,11 +427,13 @@ Return only valid JSON with detection_ids, without any additional text."""
         response = self.client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a document structure analyzer that returns only valid JSON with detection_ids."},
+                {"role": "system", "content": "You are a document structure analyzer that returns only valid JSON with detection_ids. Always preserve checkbox hierarchies."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0
         )
+        print("\n🔍 Raw LLM Output:\n", response.choices[0].message.content)
+
         
         try:
             # Get the organized detection IDs from LLM
@@ -352,15 +449,49 @@ Return only valid JSON with detection_ids, without any additional text."""
                 
                 section = predictions_map[section_id]
                 # Include all metadata from the original section
-                section_data = section.copy()
-                section_data['fields'] = []
+                section_data = {
+                    'width': section.get('width', 0),
+                    'height': section.get('height', 0),
+                    'x': section.get('x', 0),
+                    'y': section.get('y', 0),
+                    'confidence': section.get('confidence', 0),
+                    'class_id': section.get('class_id', 0),
+                    'class': section.get('class', ''),
+                    'detection_id': section['detection_id'],
+                    'parent_id': section.get('parent_id', ''),
+                    'filename': section.get('filename', ''),
+                    'text': section.get('text', ''),
+                    'fields': [],
+                    'checkbox_contexts': {}
+                }
+                
+                # First, preserve any existing checkbox_contexts from the original structure
+                if section_id in structure['sections']:
+                    section_data['checkbox_contexts'] = structure['sections'][section_id].get('checkbox_contexts', {})
                 
                 # Add fields based on the LLM-organized structure
                 for field_id in field_ids:
                     if field_id in predictions_map:
                         field = predictions_map[field_id]
-                        # Include all metadata from the original field
-                        field_data = field.copy()
+                        
+                        # Skip checkbox-related elements since they'll be handled in the checkbox_contexts hierarchy
+                        if field.get('class') in ['checkbox_context', 'checkbox_option', 'checkbox']:
+                            continue
+                        
+                        # Regular field
+                        field_data = {
+                            'width': field.get('width', 0),
+                            'height': field.get('height', 0),
+                            'x': field.get('x', 0),
+                            'y': field.get('y', 0),
+                            'confidence': field.get('confidence', 0),
+                            'class_id': field.get('class_id', 0),
+                            'class': field.get('class', ''),
+                            'detection_id': field['detection_id'],
+                            'parent_id': field.get('parent_id', ''),
+                            'filename': field.get('filename', ''),
+                            'text': field.get('text', '')
+                        }
                         section_data['fields'].append(field_data)
                 
                 enhanced_structure[section_id] = section_data
@@ -391,7 +522,7 @@ Return only valid JSON with detection_ids, without any additional text."""
 
 def main():
     # Create output directory if it doesn't exist
-    output_dir = Path("output")
+    output_dir = Path("./output")
     output_dir.mkdir(exist_ok=True)
 
     # Default paths relative to script location
@@ -417,4 +548,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()
+    

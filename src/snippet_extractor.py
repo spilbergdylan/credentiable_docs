@@ -60,6 +60,9 @@ class SnippetExtractor:
                     pred["filename"] = filename
                     enriched_predictions.append(pred)
 
+        # Create output directory if it doesn't exist
+        os.makedirs("./output", exist_ok=True)
+
         with open("./output/predictions.json", "w", encoding="utf-8") as f:
             json.dump(enriched_predictions, f, indent=2, ensure_ascii=False)
 
@@ -121,9 +124,9 @@ def main():
 if __name__ == "__main__":
     main()
 
-# python snippet_extractor.py \
-#     --image ../images/train4.jpg \
-#     --output ../snippets \
-#     --api_key "eBaGauw8J2VV1q04yRhD" \
-#     --workspace "cred" \
-#     --workflow "detect-count-and-visualize-2"
+        # python ./src/snippet_extractor.py \
+        #     --image ./images/train4.jpg \
+        #     --output ./snippets \
+        #     --api_key "eBaGauw8J2VV1q04yRhD" \
+        #     --workspace "cred" \
+        #     --workflow "detect-count-and-visualize-2"
