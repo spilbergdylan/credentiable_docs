@@ -1,6 +1,7 @@
 import os
 import json
 import base64
+import shutil
 from PIL import Image
 from inference_sdk import InferenceHTTPClient
 
@@ -20,7 +21,18 @@ class SnippetExtractor:
             api_key=self.api_key
         )
 
+    def _clear_output_directory(self):
+        """Clear the output directory before generating new snippets."""
+        if os.path.exists(self.output_dir):
+            print(f"🗑️ Clearing existing snippets in {self.output_dir}")
+            shutil.rmtree(self.output_dir)
+            os.makedirs(self.output_dir)
+            print("✅ Output directory cleared")
+
     def extract(self):
+        # Clear existing snippets before generating new ones
+        self._clear_output_directory()
+        
         print("📤 Sending image to Roboflow...")
         with open(self.image_path, 'rb') as f:
             image_data = base64.b64encode(f.read()).decode('utf-8')

@@ -4,12 +4,16 @@ import argparse
 from typing import List, Dict, Any
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 class DocumentStructurer:
     def __init__(self):
+        # Load environment variables from .env file
+        load_dotenv()
+        
         api_key = os.getenv('OPENAI_API_KEY')
         if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable is not set")
+            raise ValueError("OPENAI_API_KEY environment variable is not set. Please set it in your .env file.")
         self.client = OpenAI(api_key=api_key)
 
     def _is_contained_within(self, element: Dict, container: Dict, threshold: float = 0.8) -> bool:
