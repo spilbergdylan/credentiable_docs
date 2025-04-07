@@ -1,20 +1,18 @@
 import json
-from openai import OpenAI
 import argparse
 from typing import List, Dict, Any
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from gpt_call import GPTDocumentEnhancer
 
 class DocumentStructurer:
     def __init__(self):
         # Load environment variables from .env file
         load_dotenv()
         
-        api_key = os.getenv('OPENAI_API_KEY')
-        if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable is not set. Please set it in your .env file.")
-        self.client = OpenAI(api_key=api_key)
+        # Initialize the GPT enhancer
+        self.gpt_enhancer = GPTDocumentEnhancer()
 
     def _is_contained_within(self, element: Dict, container: Dict, threshold: float = 0.8) -> bool:
         """Check if one element is contained within another based on bounding boxes."""
@@ -382,246 +380,181 @@ class DocumentStructurer:
         # Create a map of all predictions for quick lookup
         predictions_map = {pred['detection_id']: pred for pred in original_predictions}
         
-        # Prepare the prompt for the LLM
-        prompt = """Analyze this document structure and:
-1. Organize the fields into their respective sections
-2. Clean up the text in fields, tables, and checkbox elements:
-   - Fix OCR errors and typos
-   - Remove extra spaces and newlines
-   - Standardize formatting
-   - Preserve important punctuation
-   - Keep empty fields as empty strings
-   - Maintain checkbox hierarchies (context -> option -> checkbox)
-
-For each section, include ALL field IDs in the array for their respective sections.
-Include ALL table IDs in the array for their respective sections.
-Include ALL checkbox_context IDs in the array for their respective sections.
-
-IMPORTANT: 
-1. Use the section IDs exactly as they appear in the input structure. Do not add any prefixes or modify the IDs.
-2. For tables, include ALL field IDs that belong to that table in the same array as the table ID.
-3. Fields that belong to a table should be included in the same array as their parent table.
-4. For checkbox contexts, include ALL checkbox_option IDs that belong to that context.
-5. For checkbox options, include ALL checkbox IDs that belong to that option.
-6. Return both the cleaned text and the original text for each field, table, and checkbox element.
-
-The output should be a JSON object with two parts:
-1. "structure": Object where keys are section IDs and values are arrays of field IDs, table IDs, and checkbox_context IDs
-2. "cleaned_text": Object mapping detection_ids to their cleaned text values
-
-Example format:
-{
-    "structure": {
-        "d0adf60d-e72b-4ac3-b3a6-770ba7fdaf79": ["field_id_1", "field_id_2", "table_id_1", "checkbox_context_id_1"],
-        "96088e19-833e-4ef6-95c6-7f4c653f7c38": ["field_id_5", "field_id_6", "table_id_2", "checkbox_context_id_2"]
-    },
-    "cleaned_text": {
-        "field_id_1": "Last Name",
-        "field_id_2": "First Name",
-        "table_id_1": "Medical Licensure/Certification",
-        "checkbox_context_id_1": "Gender",
-        "checkbox_option_id_1": "Male",
-        "checkbox_id_1": "☐"
-    }
-}
-
-Current document structure:
-"""
+        # Get LLM response from the GPT enhancer
+        llm_output = self.gpt_enhancer.enhance_structure(structure, original_predictions)
+        llm_structure = llm_output['structure']
+        cleaned_text = llm_output.get('cleaned_text', {})
         
-        # Add the current structure to the prompt
-        prompt += json.dumps(structure, indent=2)
+        # Create enhanced structure
+        enhanced_structure = {}
         
-        # Get LLM response
-        print("\n🔍 Raw LLM Output:")
-        llm_response = self.client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a document structure analyzer that returns only valid JSON with detection_ids. Always preserve checkbox hierarchies. Use section IDs exactly as they appear in the input. For tables, include all field IDs that belong to that table in the same array. Clean up text by fixing OCR errors and standardizing formatting."},
-                {"role": "user", "content": prompt}
-            ]
-        ).choices[0].message.content
-        print(llm_response)
-        
-        try:
-            # Parse the LLM response
-            llm_output = json.loads(llm_response)
-            llm_structure = llm_output['structure']
-            cleaned_text = llm_output.get('cleaned_text', {})
+        # Process each section
+        for section_id, element_ids in llm_structure.items():
+            if section_id not in structure:
+                continue
+                
+            section_data = structure[section_id]
             
-            # Create enhanced structure
-            enhanced_structure = {}
+            # Track which fields have been assigned to tables
+            fields_in_tables = set()
             
-            # Process each section
-            for section_id, element_ids in llm_structure.items():
-                if section_id not in structure:
-                    continue
-                    
-                section_data = structure[section_id]
-                
-                # Track which fields have been assigned to tables
-                fields_in_tables = set()
-                
-                # First, process tables and their fields
-                tables = {}
-                for element_id in element_ids:
-                    if element_id in predictions_map:
-                        element = predictions_map[element_id]
-                        if element['class'] == 'table':
-                            # Add table with all its metadata and cleaned text
-                            tables[element_id] = {
-                                'type': 'table',
-                                'text': cleaned_text.get(element_id, element.get('text', '')),
-                                'confidence': element.get('confidence', 0.0),
-                                'detection_id': element_id,
-                                'fields': [],
-                                'checkbox_contexts': []
-                            }
-                            
-                            # Find fields and checkbox contexts contained within this table
-                            for field_id in element_ids:
-                                if field_id in predictions_map:
-                                    field = predictions_map[field_id]
-                                    if field['class'] == 'field' and self._is_contained_within(field, element):
-                                        tables[element_id]['fields'].append({
-                                            'type': 'field',
-                                            'text': cleaned_text.get(field_id, field.get('text', '')),
-                                            'confidence': field.get('confidence', 0.0),
-                                            'detection_id': field['detection_id']
-                                        })
-                                        fields_in_tables.add(field_id)
-                                    elif field['class'] == 'checkbox_context' and self._is_contained_within(field, element):
-                                        # Process checkbox context within table
-                                        context_options = []
-                                        for option_id in element_ids:
-                                            if option_id in predictions_map:
-                                                option = predictions_map[option_id]
-                                                if option['class'] == 'checkbox_option' and self._is_contained_within(option, field):
-                                                    option_checkboxes = []
-                                                    for checkbox_id in element_ids:
-                                                        if checkbox_id in predictions_map:
-                                                            checkbox = predictions_map[checkbox_id]
-                                                            if checkbox['class'] == 'checkbox' and self._is_contained_within(checkbox, option):
-                                                                option_checkboxes.append({
-                                                                    'type': 'checkbox',
-                                                                    'text': cleaned_text.get(checkbox_id, checkbox.get('text', '')),
-                                                                    'confidence': checkbox.get('confidence', 0.0),
-                                                                    'detection_id': checkbox_id
-                                                                })
-                                                    context_options.append({
-                                                        'type': 'checkbox_option',
-                                                        'text': cleaned_text.get(option_id, option.get('text', '')),
-                                                        'confidence': option.get('confidence', 0.0),
-                                                        'detection_id': option_id,
-                                                        'checkboxes': option_checkboxes
-                                                    })
-                                        tables[element_id]['checkbox_contexts'].append({
-                                            'type': 'checkbox_context',
-                                            'text': cleaned_text.get(field_id, field.get('text', '')),
-                                            'confidence': field.get('confidence', 0.0),
-                                            'detection_id': field_id,
-                                            'options': context_options
-                                        })
-                
-                # Now process remaining fields and checkbox contexts
-                fields = []
-                checkbox_contexts = []
-                
-                # First, add fields that are explicitly assigned to this section by the LLM
-                for element_id in element_ids:
-                    if element_id in predictions_map:
-                        element = predictions_map[element_id]
-                        if element['class'] == 'field' and element_id not in fields_in_tables:
-                            # Add field with all its metadata and cleaned text
-                            fields.append({
-                                'width': element.get('width', 0.0),
-                                'height': element.get('height', 0.0),
-                                'x': element.get('x', 0.0),
-                                'y': element.get('y', 0.0),
-                                'confidence': element.get('confidence', 0.0),
-                                'class_id': element.get('class_id', 0),
-                                'class': element.get('class', ''),
-                                'detection_id': element_id,
-                                'parent_id': element.get('parent_id', ''),
-                                'filename': element.get('filename', ''),
-                                'text': cleaned_text.get(element_id, element.get('text', ''))
-                            })
-                        elif element['class'] == 'checkbox_context':
-                            # Process checkbox context with its options and checkboxes
-                            context_options = []
-                            for option_id in element_ids:
-                                if option_id in predictions_map:
-                                    option = predictions_map[option_id]
-                                    if option['class'] == 'checkbox_option' and self._is_contained_within(option, element):
-                                        option_checkboxes = []
-                                        for checkbox_id in element_ids:
-                                            if checkbox_id in predictions_map:
-                                                checkbox = predictions_map[checkbox_id]
-                                                if checkbox['class'] == 'checkbox' and self._is_contained_within(checkbox, option):
-                                                    option_checkboxes.append({
-                                                        'type': 'checkbox',
-                                                        'text': cleaned_text.get(checkbox_id, checkbox.get('text', '')),
-                                                        'confidence': checkbox.get('confidence', 0.0),
-                                                        'detection_id': checkbox_id
-                                                    })
-                                        context_options.append({
-                                            'type': 'checkbox_option',
-                                            'text': cleaned_text.get(option_id, option.get('text', '')),
-                                            'confidence': option.get('confidence', 0.0),
-                                            'detection_id': option_id,
-                                            'checkboxes': option_checkboxes
-                                        })
-                            checkbox_contexts.append({
-                                'type': 'checkbox_context',
-                                'text': cleaned_text.get(element_id, element.get('text', '')),
-                                'confidence': element.get('confidence', 0.0),
-                                'detection_id': element_id,
-                                'options': context_options
-                            })
-                
-                # Then, add any fields that are spatially contained within this section but not yet assigned
-                section_elem = predictions_map[section_id]
-                for pred in original_predictions:
-                    if (pred['class'] == 'field' and 
-                        pred['detection_id'] not in fields_in_tables and 
-                        pred['detection_id'] not in [f['detection_id'] for f in fields] and
-                        self._is_contained_within(pred, section_elem)):
+            # First, process tables and their fields
+            tables = {}
+            for element_id in element_ids:
+                if element_id in predictions_map:
+                    element = predictions_map[element_id]
+                    if element['class'] == 'table':
+                        # Add table with all its metadata and cleaned text
+                        tables[element_id] = {
+                            'type': 'table',
+                            'text': cleaned_text.get(element_id, element.get('text', '')),
+                            'confidence': element.get('confidence', 0.0),
+                            'detection_id': element_id,
+                            'fields': [],
+                            'checkbox_contexts': []
+                        }
+                        
+                        # Find fields and checkbox contexts contained within this table
+                        for field_id in element_ids:
+                            if field_id in predictions_map:
+                                field = predictions_map[field_id]
+                                if field['class'] == 'field' and self._is_contained_within(field, element):
+                                    tables[element_id]['fields'].append({
+                                        'type': 'field',
+                                        'text': cleaned_text.get(field_id, field.get('text', '')),
+                                        'confidence': field.get('confidence', 0.0),
+                                        'detection_id': field['detection_id']
+                                    })
+                                    fields_in_tables.add(field_id)
+                                elif field['class'] == 'checkbox_context' and self._is_contained_within(field, element):
+                                    # Process checkbox context within table
+                                    context_options = []
+                                    for option_id in element_ids:
+                                        if option_id in predictions_map:
+                                            option = predictions_map[option_id]
+                                            if option['class'] == 'checkbox_option' and self._is_contained_within(option, field):
+                                                option_checkboxes = []
+                                                for checkbox_id in element_ids:
+                                                    if checkbox_id in predictions_map:
+                                                        checkbox = predictions_map[checkbox_id]
+                                                        if checkbox['class'] == 'checkbox' and self._is_contained_within(checkbox, option):
+                                                            option_checkboxes.append({
+                                                                'type': 'checkbox',
+                                                                'text': cleaned_text.get(checkbox_id, checkbox.get('text', '')),
+                                                                'confidence': checkbox.get('confidence', 0.0),
+                                                                'detection_id': checkbox_id
+                                                            })
+                                                context_options.append({
+                                                    'type': 'checkbox_option',
+                                                    'text': cleaned_text.get(option_id, option.get('text', '')),
+                                                    'confidence': option.get('confidence', 0.0),
+                                                    'detection_id': option_id,
+                                                    'checkboxes': option_checkboxes
+                                                })
+                                    tables[element_id]['checkbox_contexts'].append({
+                                        'type': 'checkbox_context',
+                                        'text': cleaned_text.get(field_id, field.get('text', '')),
+                                        'confidence': field.get('confidence', 0.0),
+                                        'detection_id': field_id,
+                                        'options': context_options
+                                    })
+            
+            # Now process remaining fields and checkbox contexts
+            fields = []
+            checkbox_contexts = []
+            
+            # First, add fields that are explicitly assigned to this section by the LLM
+            for element_id in element_ids:
+                if element_id in predictions_map:
+                    element = predictions_map[element_id]
+                    if element['class'] == 'field' and element_id not in fields_in_tables:
+                        # Add field with all its metadata and cleaned text
                         fields.append({
-                            'width': pred.get('width', 0.0),
-                            'height': pred.get('height', 0.0),
-                            'x': pred.get('x', 0.0),
-                            'y': pred.get('y', 0.0),
-                            'confidence': pred.get('confidence', 0.0),
-                            'class_id': pred.get('class_id', 0),
-                            'class': pred.get('class', ''),
-                            'detection_id': pred['detection_id'],
-                            'parent_id': pred.get('parent_id', ''),
-                            'filename': pred.get('filename', ''),
-                            'text': cleaned_text.get(pred['detection_id'], pred.get('text', ''))
+                            'width': element.get('width', 0.0),
+                            'height': element.get('height', 0.0),
+                            'x': element.get('x', 0.0),
+                            'y': element.get('y', 0.0),
+                            'confidence': element.get('confidence', 0.0),
+                            'class_id': element.get('class_id', 0),
+                            'class': element.get('class', ''),
+                            'detection_id': element_id,
+                            'parent_id': element.get('parent_id', ''),
+                            'filename': element.get('filename', ''),
+                            'text': cleaned_text.get(element_id, element.get('text', ''))
                         })
-                
-                # Create enhanced section entry with cleaned text
-                enhanced_structure[section_id] = {
-                    'width': section_data.get('width', 0.0),
-                    'height': section_data.get('height', 0.0),
-                    'x': section_data.get('x', 0.0),
-                    'y': section_data.get('y', 0.0),
-                    'confidence': section_data.get('confidence', 0.0),
-                    'class_id': section_data.get('class_id', 0),
-                    'class': section_data.get('class', ''),
-                    'detection_id': section_id,
-                    'parent_id': section_data.get('parent_id', ''),
-                    'filename': section_data.get('filename', ''),
-                    'text': cleaned_text.get(section_id, section_data.get('text', '')),
-                    'fields': fields,
-                    'tables': tables,
-                    'checkbox_contexts': checkbox_contexts
-                }
+                    elif element['class'] == 'checkbox_context':
+                        # Process checkbox context with its options and checkboxes
+                        context_options = []
+                        for option_id in element_ids:
+                            if option_id in predictions_map:
+                                option = predictions_map[option_id]
+                                if option['class'] == 'checkbox_option' and self._is_contained_within(option, element):
+                                    option_checkboxes = []
+                                    for checkbox_id in element_ids:
+                                        if checkbox_id in predictions_map:
+                                            checkbox = predictions_map[checkbox_id]
+                                            if checkbox['class'] == 'checkbox' and self._is_contained_within(checkbox, option):
+                                                option_checkboxes.append({
+                                                    'type': 'checkbox',
+                                                    'text': cleaned_text.get(checkbox_id, checkbox.get('text', '')),
+                                                    'confidence': checkbox.get('confidence', 0.0),
+                                                    'detection_id': checkbox_id
+                                                })
+                                    context_options.append({
+                                        'type': 'checkbox_option',
+                                        'text': cleaned_text.get(option_id, option.get('text', '')),
+                                        'confidence': option.get('confidence', 0.0),
+                                        'detection_id': option_id,
+                                        'checkboxes': option_checkboxes
+                                    })
+                        checkbox_contexts.append({
+                            'type': 'checkbox_context',
+                            'text': cleaned_text.get(element_id, element.get('text', '')),
+                            'confidence': element.get('confidence', 0.0),
+                            'detection_id': element_id,
+                            'options': context_options
+                        })
             
-            return enhanced_structure
+            # Then, add any fields that are spatially contained within this section but not yet assigned
+            section_elem = predictions_map[section_id]
+            for pred in original_predictions:
+                if (pred['class'] == 'field' and 
+                    pred['detection_id'] not in fields_in_tables and 
+                    pred['detection_id'] not in [f['detection_id'] for f in fields] and
+                    self._is_contained_within(pred, section_elem)):
+                    fields.append({
+                        'width': pred.get('width', 0.0),
+                        'height': pred.get('height', 0.0),
+                        'x': pred.get('x', 0.0),
+                        'y': pred.get('y', 0.0),
+                        'confidence': pred.get('confidence', 0.0),
+                        'class_id': pred.get('class_id', 0),
+                        'class': pred.get('class', ''),
+                        'detection_id': pred['detection_id'],
+                        'parent_id': pred.get('parent_id', ''),
+                        'filename': pred.get('filename', ''),
+                        'text': cleaned_text.get(pred['detection_id'], pred.get('text', ''))
+                    })
             
-        except json.JSONDecodeError as e:
-            print(f"Error parsing LLM response: {e}")
-            return structure
+            # Create enhanced section entry with cleaned text
+            enhanced_structure[section_id] = {
+                'width': section_data.get('width', 0.0),
+                'height': section_data.get('height', 0.0),
+                'x': section_data.get('x', 0.0),
+                'y': section_data.get('y', 0.0),
+                'confidence': section_data.get('confidence', 0.0),
+                'class_id': section_data.get('class_id', 0),
+                'class': section_data.get('class', ''),
+                'detection_id': section_id,
+                'parent_id': section_data.get('parent_id', ''),
+                'filename': section_data.get('filename', ''),
+                'text': cleaned_text.get(section_id, section_data.get('text', '')),
+                'fields': fields,
+                'tables': tables,
+                'checkbox_contexts': checkbox_contexts
+            }
+        
+        return enhanced_structure
 
     def process(self, predictions_file: str, output_file: str):
         """Process the OCR predictions and create a structured document."""
