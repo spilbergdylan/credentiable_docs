@@ -14,7 +14,7 @@ class SnippetOCR:
         self.predictions = predictions
         # Initialize PaddleOCR with more conservative memory settings
         self.ocr = PaddleOCR(
-            use_angle_cls=False,
+            use_angle_cls=True,
             lang='en',
             show_log=False,
             use_gpu=False  # Force CPU usage to avoid memory issues
@@ -41,16 +41,70 @@ class SnippetOCR:
         result = self.ocr.ocr(image_np, cls=False)
         return result[0][0][1][0] if result and result[0] else ""
 
-    def process_with_tesseract(self, image):
-        """Process image with Tesseract OCR"""
-        # Tesseract works better with the original image or with different preprocessing
-        # For sections, we'll use a different preprocessing approach
+    def preprocess_section(self, image):
+        """Special preprocessing for section images to improve title recognition"""
+        # Resize large images to prevent memory issues
+        max_size = 800
+        if max(image.size) > max_size:
+            ratio = max_size / max(image.size)
+            new_size = tuple(int(dim * ratio) for dim in image.size)
+            image = image.resize(new_size, Image.Resampling.LANCZOS)
+        
+        # Convert to grayscale
         gray = image.convert("L")
-        # Increase contrast for better text recognition
-        contrasted = ImageEnhance.Contrast(gray).enhance(2.5)
-        # Use Tesseract with specific configuration for better results
-        text = pytesseract.image_to_string(contrasted, config='--psm 6 --oem 3')
-        return text.strip()
+        
+        # Enhance contrast more aggressively for sections
+        contrasted = ImageEnhance.Contrast(gray).enhance(3.0)
+        
+        # Apply threshold to make text more distinct
+        threshold = 200
+        binary = contrasted.point(lambda x: 255 if x > threshold else 0)
+        
+        return binary
+
+    def clean_section_text(self, text):
+        """Clean and extract the section title from OCR text"""
+        # Split into lines and remove empty ones
+        lines = [line.strip() for line in text.split('\n') if line.strip()]
+        
+        # If no lines, return empty string
+        if not lines:
+            return ""
+            
+        # Take the first non-empty line as the title
+        title = lines[0]
+        
+        # Remove common OCR artifacts
+        title = title.replace('|', '')  # Remove vertical bars
+        title = title.replace('[', '').replace(']', '')  # Remove brackets
+        title = title.replace('{', '').replace('}', '')  # Remove braces
+        title = title.replace('_', ' ')  # Replace underscores with spaces
+        
+        # Remove multiple spaces
+        title = ' '.join(title.split())
+        
+        # Capitalize first letter of each word
+        title = title.title()
+        
+        return title
+
+    def process_with_tesseract(self, image, is_section=False):
+        """Process image with Tesseract OCR"""
+        if is_section:
+            # Use special preprocessing for sections
+            processed = self.preprocess_section(image)
+            # Use specific configuration for section titles
+            text = pytesseract.image_to_string(processed, config='--psm 6 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,/-() ')
+            # Clean the section text
+            text = self.clean_section_text(text)
+        else:
+            # Regular preprocessing for other images
+            gray = image.convert("L")
+            contrasted = ImageEnhance.Contrast(gray).enhance(2.5)
+            text = pytesseract.image_to_string(contrasted, config='--psm 6 --oem 3')
+            text = text.strip()
+        
+        return text
 
     def run(self):
         filename_to_pred = {pred['filename']: pred for pred in self.predictions if 'filename' in pred}
@@ -71,13 +125,13 @@ class SnippetOCR:
                 if filename in self.paddle_failed_images:
                     print("📄 Using Tesseract (previously failed with PaddleOCR)", flush=True)
                     start = time.time()
-                    text = self.process_with_tesseract(image)
+                    text = self.process_with_tesseract(image, is_section)
                     elapsed = time.time() - start
                 elif is_section:
-                    # Use Tesseract for section images
+                    # Use Tesseract for section images with special processing
                     print("📄 Using Tesseract for section image", flush=True)
                     start = time.time()
-                    text = self.process_with_tesseract(image)
+                    text = self.process_with_tesseract(image, is_section)
                     elapsed = time.time() - start
                 else:
                     # Try PaddleOCR for other images
@@ -96,7 +150,7 @@ class SnippetOCR:
                         self.paddle_failed_images.add(filename)
                         # Try with Tesseract
                         start = time.time()
-                        text = self.process_with_tesseract(image)
+                        text = self.process_with_tesseract(image, is_section)
                         elapsed = time.time() - start
                 
                 pred["text"] = text
