@@ -117,15 +117,28 @@ def process_tables(data: Dict) -> Dict:
         # Add context to empty fields
         if "fields" in processed_table:
             for i, field in enumerate(processed_table["fields"]):
-                if field.get("text", "").strip() == "":
+                field_text = field.get("text", "")
+                # Handle both string and dictionary text fields
+                if isinstance(field_text, dict):
+                    field_text = field_text.get("cleaned", "") or field_text.get("original", "")
+                
+                if not field_text.strip():  # Now we can safely call strip()
                     # Find the corresponding context in the context_data
                     field_id = field.get("detection_id", "")
                     if field_id in context_data:
                         # Replace the blank text with the table context
-                        field["text"] = context_data[field_id]
+                        if isinstance(field["text"], dict):
+                            field["text"]["cleaned"] = context_data[field_id]
+                            field["text"]["original"] = context_data[field_id]
+                        else:
+                            field["text"] = context_data[field_id]
                     else:
                         # If no specific context found, use a simple fallback
-                        field["text"] = "Unknown field"
+                        if isinstance(field["text"], dict):
+                            field["text"]["cleaned"] = "Unknown field"
+                            field["text"]["original"] = "Unknown field"
+                        else:
+                            field["text"] = "Unknown field"
         
         result[table_id] = processed_table
     
