@@ -71,7 +71,7 @@ class GPTDocumentEnhancer:
         # Get LLM response
         print("\n🔍 Raw LLM Output:")
         llm_response = self.client.chat.completions.create(
-            model="o3-mini",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a document structure analyzer that returns only valid JSON with detection_ids. Always preserve checkbox hierarchies. Use section IDs exactly as they appear in the input. For tables, include all field IDs that belong to that table in the same array. Clean up text by fixing OCR errors and standardizing formatting."},
                 {"role": "user", "content": prompt}

@@ -55,27 +55,11 @@ class DocumentStructurer:
                     'text': table_elem.get('text', ''),
                     'confidence': table_elem.get('confidence', 0.0),
                     'detection_id': table_id,
-                    'width': table_elem.get('width', 0.0),
-                    'height': table_elem.get('height', 0.0),
-                    'x': table_elem.get('x', 0.0),
-                    'y': table_elem.get('y', 0.0),
-                    'class_id': table_elem.get('class_id', 0),
-                    'class': table_elem.get('class', ''),
-                    'parent_id': table_elem.get('parent_id', ''),
-                    'filename': table_elem.get('filename', ''),
                     'fields': [{
                         'type': 'field',
                         'text': field.get('text', ''),
                         'confidence': field.get('confidence', 0.0),
-                        'detection_id': field['detection_id'],
-                        'width': field.get('width', 0.0),
-                        'height': field.get('height', 0.0),
-                        'x': field.get('x', 0.0),
-                        'y': field.get('y', 0.0),
-                        'class_id': field.get('class_id', 0),
-                        'class': field.get('class', ''),
-                        'parent_id': field.get('parent_id', ''),
-                        'filename': field.get('filename', '')
+                        'detection_id': field['detection_id']
                     } for field in table_fields],
                     'checkbox_contexts': []
                 }
@@ -114,14 +98,6 @@ class DocumentStructurer:
                         'text': context.get('text', ''),
                         'confidence': context.get('confidence', 0.0),
                         'detection_id': context_id,
-                        'width': context.get('width', 0.0),
-                        'height': context.get('height', 0.0),
-                        'x': context.get('x', 0.0),
-                        'y': context.get('y', 0.0),
-                        'class_id': context.get('class_id', 0),
-                        'class': context.get('class', ''),
-                        'parent_id': context.get('parent_id', ''),
-                        'filename': context.get('filename', ''),
                         'options': context_options
                     })
         
@@ -182,14 +158,6 @@ class DocumentStructurer:
                         'text': context.get('text', ''),
                         'confidence': context.get('confidence', 0.0),
                         'detection_id': context_id,
-                        'width': context.get('width', 0.0),
-                        'height': context.get('height', 0.0),
-                        'x': context.get('x', 0.0),
-                        'y': context.get('y', 0.0),
-                        'class_id': context.get('class_id', 0),
-                        'class': context.get('class', ''),
-                        'parent_id': context.get('parent_id', ''),
-                        'filename': context.get('filename', ''),
                         'options': context_options
                     })
                 
@@ -261,14 +229,6 @@ class DocumentStructurer:
                             'text': cleaned_text.get(element_id, element.get('text', '')),
                             'confidence': element.get('confidence', 0.0),
                             'detection_id': element_id,
-                            'width': element.get('width', 0.0),
-                            'height': element.get('height', 0.0),
-                            'x': element.get('x', 0.0),
-                            'y': element.get('y', 0.0),
-                            'class_id': element.get('class_id', 0),
-                            'class': element.get('class', ''),
-                            'parent_id': element.get('parent_id', ''),
-                            'filename': element.get('filename', ''),
                             'fields': [],
                             'checkbox_contexts': []
                         }
@@ -282,15 +242,7 @@ class DocumentStructurer:
                                         'type': 'field',
                                         'text': cleaned_text.get(field_id, field.get('text', '')),
                                         'confidence': field.get('confidence', 0.0),
-                                        'detection_id': field['detection_id'],
-                                        'width': field.get('width', 0.0),
-                                        'height': field.get('height', 0.0),
-                                        'x': field.get('x', 0.0),
-                                        'y': field.get('y', 0.0),
-                                        'class_id': field.get('class_id', 0),
-                                        'class': field.get('class', ''),
-                                        'parent_id': field.get('parent_id', ''),
-                                        'filename': field.get('filename', '')
+                                        'detection_id': field['detection_id']
                                     })
                                     fields_in_tables.add(field_id)
                                 elif field['class'] == 'checkbox_context' and is_contained_within(field, element):
@@ -323,14 +275,6 @@ class DocumentStructurer:
                                         'text': cleaned_text.get(field_id, field.get('text', '')),
                                         'confidence': field.get('confidence', 0.0),
                                         'detection_id': field_id,
-                                        'width': field.get('width', 0.0),
-                                        'height': field.get('height', 0.0),
-                                        'x': field.get('x', 0.0),
-                                        'y': field.get('y', 0.0),
-                                        'class_id': field.get('class_id', 0),
-                                        'class': field.get('class', ''),
-                                        'parent_id': field.get('parent_id', ''),
-                                        'filename': field.get('filename', ''),
                                         'options': context_options
                                     })
             
@@ -387,14 +331,6 @@ class DocumentStructurer:
                             'text': cleaned_text.get(element_id, element.get('text', '')),
                             'confidence': element.get('confidence', 0.0),
                             'detection_id': element_id,
-                            'width': element.get('width', 0.0),
-                            'height': element.get('height', 0.0),
-                            'x': element.get('x', 0.0),
-                            'y': element.get('y', 0.0),
-                            'class_id': element.get('class_id', 0),
-                            'class': element.get('class', ''),
-                            'parent_id': element.get('parent_id', ''),
-                            'filename': element.get('filename', ''),
                             'options': context_options
                         })
             
