@@ -144,19 +144,98 @@ def process_tables(data: Dict) -> Dict:
     
     return result
 
-def main():
-    # Load the JSON data
-    input_file = "./output/extracted_tables.json"
-    output_file = "./output/processed_tables.json"
+def extract_tables_from_document_structure(json_path: str) -> Dict:
+    """
+    Extract all tables and their fields from the document structure JSON.
     
-    data = load_json_data(input_file)
+    Args:
+        json_path (str): Path to the document_structure.json file
+        
+    Returns:
+        dict: Dictionary containing all tables and their fields
+    """
+    # Read the JSON file
+    with open(json_path, 'r') as f:
+        document_structure = json.load(f)
+    
+    # Dictionary to store all tables
+    all_tables = {}
+    
+    # Iterate through each section in the document structure
+    for section_id, section_data in document_structure.items():
+        # Check if the section has any tables
+        if 'tables' in section_data and section_data['tables']:
+            # Add each table to our collection
+            for table_id, table_data in section_data['tables'].items():
+                all_tables[table_id] = table_data
+    
+    return all_tables
+
+def update_document_structure_with_processed_tables(doc_structure: Dict, processed_tables: Dict) -> Dict:
+    """
+    Update the document structure with processed table field text.
+    
+    Args:
+        doc_structure (Dict): Original document structure
+        processed_tables (Dict): Processed tables with updated field text
+        
+    Returns:
+        Dict: Updated document structure
+    """
+    # Create a deep copy of the document structure
+    updated_structure = doc_structure.copy()
+    
+    # Iterate through each section
+    for section_id, section_data in updated_structure.items():
+        # Check if the section has any tables
+        if 'tables' in section_data and section_data['tables']:
+            # Update each table's fields with processed text
+            for table_id, table_data in section_data['tables'].items():
+                if table_id in processed_tables:
+                    processed_table = processed_tables[table_id]
+                    # Update fields with processed text
+                    if 'fields' in processed_table and 'fields' in table_data:
+                        processed_fields = {field['detection_id']: field for field in processed_table['fields']}
+                        for i, field in enumerate(table_data['fields']):
+                            field_id = field['detection_id']
+                            if field_id in processed_fields:
+                                # Update the text while preserving the original structure
+                                if isinstance(field['text'], dict):
+                                    field['text']['cleaned'] = processed_fields[field_id]['text']
+                                    field['text']['original'] = processed_fields[field_id]['text']
+                                else:
+                                    field['text'] = processed_fields[field_id]['text']
+    
+    return updated_structure
+
+def main():
+    # Example usage
+    doc_structure_path = "output/document_structure.json"
+    tables = extract_tables_from_document_structure(doc_structure_path)
+    
+    # Save the extracted tables to a JSON file
+    extracted_tables_path = "./output/extracted_tables.json"
+    save_json_data(tables, extracted_tables_path)
+    print(f"Extracted tables saved to {extracted_tables_path}")
     
     # Process the tables
-    processed_data = process_tables(data)
+    processed_tables = process_tables(tables)
     
-    # Save the processed data
-    save_json_data(processed_data, output_file)
-    print(f"Processed data saved to {output_file}")
+    # Save the processed tables
+    processed_tables_path = "./output/processed_tables.json"
+    save_json_data(processed_tables, processed_tables_path)
+    print(f"Processed tables saved to {processed_tables_path}")
+    
+    # Load original document structure
+    doc_structure = load_json_data(doc_structure_path)
+    
+    # Update document structure with processed table fields
+    updated_doc_structure = update_document_structure_with_processed_tables(doc_structure, processed_tables)
+    
+    # Save the final document structure
+    final_doc_path = "./output/final_doc.json"
+    save_json_data(updated_doc_structure, final_doc_path)
+    print(f"Final document structure with updated table fields saved to {final_doc_path}")
 
 if __name__ == "__main__":
     main() 

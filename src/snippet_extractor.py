@@ -66,7 +66,7 @@ class SnippetExtractor:
         enriched_predictions = []
 
         for pred in predictions:
-            if pred.get("class") in ["field", "checkbox_context", "section", "table","checkbox","checkbox_option"]:
+            if pred.get("class") in ["field", "checkbox_context", "section", "table","checkbox","checkbox_option","title"]:
                 filename = self._save_snippet(original_image, pred, (model_w, model_h))
                 if filename:
                     pred["filename"] = filename
@@ -137,8 +137,8 @@ if __name__ == "__main__":
     main()
 
         # python ./src/snippet_extractor.py \
-        #     --image ./images/train4.jpg \
+        #     --image ./images/train8.jpg \
         #     --output ./snippets \
         #     --api_key "eBaGauw8J2VV1q04yRhD" \
         #     --workspace "cred" \
-        #     --workflow "detect-count-and-visualize-2"
+        #     --workflow "detect-count-and-visualize-3"
