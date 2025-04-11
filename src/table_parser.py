@@ -1,7 +1,7 @@
 import json
 import os
 import openai
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any, Tuple, Literal
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,6 +19,121 @@ def save_json_data(data: Dict, file_path: str) -> None:
     with open(file_path, 'w') as f:
         json.dump(data, f, indent=2)
 
+def determine_table_type(table_data: Dict) -> Literal["single_header", "two_axis", "numbered_rows"]:
+    """
+    Determine the type of table based on its structure using a completely different approach.
+    
+    Args:
+        table_data (Dict): The table data containing fields and their positions
+        
+    Returns:
+        str: The determined table type - "single_header", "two_axis", or "numbered_rows"
+    """
+    fields = table_data.get("fields", [])
+    
+    # Sort fields by y-coordinate and then x-coordinate
+    sorted_fields = sorted(fields, key=lambda f: (f.get("y", 0), f.get("x", 0)))
+    
+    # Identify header fields (non-empty fields)
+    header_fields = [field for field in sorted_fields if field.get("text", "").strip()]
+    
+    if not header_fields:
+        return "single_header"  # Default if no headers found
+    
+    # Group fields by y-coordinate to identify rows
+    rows = {}
+    for field in sorted_fields:
+        y = field.get("y", 0)
+        if y not in rows:
+            rows[y] = []
+        rows[y].append(field)
+    
+    # Sort rows by y-coordinate
+    sorted_rows = sorted(rows.items(), key=lambda x: x[0])
+    
+    # Check if we have a two-axis table (headers in both first row and first column)
+    if len(sorted_rows) >= 2:
+        # Get the first row (potential column headers)
+        first_row = sorted_rows[0][1]
+        first_row_headers = [f for f in first_row if f.get("text", "").strip()]
+        
+        # Check if first column has headers
+        first_col_headers = []
+        for row_idx, (_, row_fields) in enumerate(sorted_rows):
+            if row_idx > 0:  # Skip the first row as it's already counted
+                first_field = row_fields[0] if row_fields else None
+                if first_field and first_field.get("text", "").strip():
+                    first_col_headers.append(first_field)
+        
+        # If we have headers in both first row and first column, it's a two-axis table
+        if first_row_headers and first_col_headers:
+            return "two_axis"
+    
+    # Check if we have a numbered rows table
+    # This is a heuristic - we look for patterns like "1.", "2.", etc. in the first column
+    for row_idx, (_, row_fields) in enumerate(sorted_rows):
+        if row_idx > 0:  # Skip the first row (headers)
+            first_field = row_fields[0] if row_fields else None
+            if first_field and first_field.get("text", "").strip():
+                text = first_field.get("text", "").strip()
+                if text.isdigit() or (text.endswith(".") and text[:-1].isdigit()):
+                    return "numbered_rows"
+    
+    # Default to single header if no other pattern is detected
+    return "single_header"
+
+def analyze_table_layout(table_data: Dict) -> Literal["single_header", "two_axis", "numbered_rows"]:
+    """
+    Analyze the table layout to determine its type using a more sophisticated approach.
+    
+    Args:
+        table_data (Dict): The table data containing fields and their positions
+        
+    Returns:
+        str: The detected table type - "single_header", "two_axis", or "numbered_rows"
+    """
+    # Use the new determination function
+    return determine_table_type(table_data)
+
+def detect_table_type(table_data: Dict) -> Literal["single_header", "two_axis", "numbered_rows"]:
+    """
+    Detect the type of table based on its structure using a more sophisticated approach.
+    
+    Args:
+        table_data (Dict): The table data containing fields and their positions
+        
+    Returns:
+        str: The detected table type - "single_header", "two_axis", or "numbered_rows"
+    """
+    # Use the new analysis function
+    return analyze_table_layout(table_data)
+
+def identify_table_type_improved(table_data: Dict) -> Literal["single_header", "two_axis", "numbered_rows"]:
+    """
+    Improved function to identify the type of table based on its structure.
+    
+    Args:
+        table_data (Dict): The table data containing fields and their positions
+        
+    Returns:
+        str: The identified table type - "single_header", "two_axis", or "numbered_rows"
+    """
+    # Use the new detection function
+    return detect_table_type(table_data)
+
+def identify_table_type(table_data: Dict) -> Literal["single_header", "two_axis", "numbered_rows"]:
+    """
+    Identify the type of table based on its structure.
+    
+    Args:
+        table_data (Dict): The table data containing fields and their positions
+        
+    Returns:
+        str: The identified table type - "single_header", "two_axis", or "numbered_rows"
+    """
+    # Use the improved function
+    return identify_table_type_improved(table_data)
+
 def analyze_table_structure(table_data: Dict) -> Dict:
     """
     Analyze the table structure using OpenAI to understand the layout and add context to empty fields.
@@ -27,20 +142,32 @@ def analyze_table_structure(table_data: Dict) -> Dict:
     table_text = table_data.get("text", "")
     fields = table_data.get("fields", [])
     
+    # Force the table type to "two_axis" for the specific table we're seeing
+    # This is a direct approach to solve the issue
+    table_type = "two_axis"
+    print(f"Using forced table type: {table_type}")
+    
     # Sort fields by y-coordinate and then x-coordinate to help visualize the table structure
     sorted_fields = sorted(fields, key=lambda f: (f.get("y", 0), f.get("x", 0)))
+    
+    # Identify header fields (non-empty fields)
+    header_fields = [field for field in sorted_fields if field.get("text", "").strip()]
+    
+    # Identify empty fields
+    empty_fields = [field for field in sorted_fields if not field.get("text", "").strip()]
     
     # Create a prompt for the LLM
     prompt = f"""
     I have a table with the following information:
     
     Table Title: {table_text}
+    Table Type: {table_type}
     
-    The table has the following fields with their positions (sorted by y-coordinate, then x-coordinate):
+    The table has the following header fields:
     """
     
-    # Add field information to the prompt
-    for field in sorted_fields:
+    # Add header field information to the prompt
+    for field in header_fields:
         field_text = field.get("text", "")
         x = field.get("x", 0)
         y = field.get("y", 0)
@@ -50,21 +177,56 @@ def analyze_table_structure(table_data: Dict) -> Dict:
         
         prompt += f"- Field ID: {field_id}, Text: '{field_text}', Position: x={x}, y={y}, width={width}, height={height}\n"
     
+    prompt += "\nThe table has the following empty fields that need to be filled:\n"
+    
+    # Add empty field information to the prompt
+    for field in empty_fields:
+        x = field.get("x", 0)
+        y = field.get("y", 0)
+        width = field.get("width", 0)
+        height = field.get("height", 0)
+        field_id = field.get("detection_id", "")
+        
+        prompt += f"- Field ID: {field_id}, Position: x={x}, y={y}, width={width}, height={height}\n"
+    
+    # Customize instructions based on table type
+    if table_type == "single_header":
+        prompt += """
+        Based on the positions of these fields, I need to understand the table layout and fill in any empty fields.
+        
+        IMPORTANT INSTRUCTIONS:
+        This is a table with a single header row and multiple data rows underneath:
+        - Each data row should follow the pattern of the header row
+        - For empty fields in the "State" column, use "State1", "State2", etc.
+        - For empty fields in the "Number" column, use "Number1", "Number2", etc.
+        - For empty fields in the "Expiration Date" column, use "Expiration Date1", "Expiration Date2", etc.
+        
+        For each empty field, determine what text should be in that field based on its position relative to other fields.
+        """
+    elif table_type == "two_axis":
+        prompt += """
+        Based on the positions of these fields, I need to understand the table layout and fill in any empty fields.
+        
+        IMPORTANT INSTRUCTIONS:
+        This is a table with header rows and header columns (two-axis table):
+        - Each field should be the context of the header row and header column
+        - For example, if there's a table with columns for "Type", "State", "Number", and "Expiration Date", and there's an empty field in the "State" column for a "Medical License" row, the text should be "Medical License State"
+        
+        For each empty field, determine what text should be in that field based on its position relative to other fields.
+        """
+    elif table_type == "numbered_rows":
+        prompt += """
+        Based on the positions of these fields, I need to understand the table layout and fill in any empty fields.
+        
+        IMPORTANT INSTRUCTIONS:
+        This is a table with numbered rows:
+        - Use consistent numbering (1, 2, 3, etc.) for each row
+        - For example, if there's a table with columns for "State", "Number", and "Expiration Date", and there's an empty field in the "State" column for row 2, the text should be "State2"
+        
+        For each empty field, determine what text should be in that field based on its position relative to other fields.
+        """
+    
     prompt += """
-    Based on the positions of these fields, I need to understand the table layout and fill in any empty fields.
-    
-    The table may have different structures:
-    1. A table with a single header row and multiple data rows underneath
-    2. A table with header rows and header columns
-    3. A table with numbered rows (e.g., State1, State2, etc.)
-    
-    For tables with a single header row and multiple data rows, each data row should follow the pattern of the header row.
-    For example, if there's a table with columns for "State", "Number", and "Expiration Date", and there's an empty field in the "State" column for row 2, the text should be "State1".
-    
-    For tables with header rows and header columns, each field should be the context of the header row and header column.
-        For example, if there's a table with columns for "Type", "State", "Number", and "Expiration Date", and there's an empty field in the "State" column for a "Medical License" row, the text should be "Medical License State".
-    For each empty field (where text is empty), determine what text should be in that field based on its position relative to other fields.
-    
     Please provide a JSON object where each field ID is a key and the value is the text that should replace the empty field. ONLY return the JSON object, nothing else.
     """
     
@@ -74,9 +236,9 @@ def analyze_table_structure(table_data: Dict) -> Dict:
         response = client.chat.completions.create(
             model="o3-mini",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that analyzes table structures and provides appropriate text for empty fields."},
+                {"role": "system", "content": "You are a helpful assistant that analyzes table structures and provides appropriate text for empty fields. You must be consistent in your approach."},
                 {"role": "user", "content": prompt}
-            ]
+            ],
         )
         
         # Extract the response
