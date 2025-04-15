@@ -79,6 +79,9 @@ class SnippetExtractor:
             json.dump(enriched_predictions, f, indent=2, ensure_ascii=False)
 
         print("✅ Saved predictions to predictions.json")
+        
+        # Return the predictions list
+        return enriched_predictions
 
     def _save_snippet(self, image, pred, model_input_size):
         img_w, img_h = image.size

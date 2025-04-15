@@ -3,9 +3,9 @@ import os
 from typing import Dict, Any, Union
 
 class CleanDoc:
-    def __init__(self, input_file: str):
-        """Initialize the CleanDoc class with the input file path."""
-        self.input_file = input_file
+    def __init__(self):
+        """Initialize the CleanDoc class."""
+        pass # No file needed at init
         
     def _clean_text(self, text_field: Any) -> str:
         """Clean a text field, handling both string and dict formats."""
@@ -51,31 +51,38 @@ class CleanDoc:
         
         return cleaned_field
     
-    def clean_document(self) -> Dict[str, Any]:
-        """Clean the entire document."""
-        with open(self.input_file, 'r') as f:
-            doc = json.load(f)
-        
+    def clean_document(self, doc: Dict[str, Any]) -> Dict[str, Any]:
+        """Clean the entire document dictionary."""
         cleaned_doc = {}
         for key, value in doc.items():
             cleaned_doc[key] = self._clean_field(value)
         
         return cleaned_doc
     
-    def save_cleaned_document(self, output_file: str):
-        """Save the cleaned document to a new file."""
-        cleaned_doc = self.clean_document()
-        
-        # Create output directory if it doesn't exist
-        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    def save_cleaned_document(self, data_to_save: Dict[str, Any], output_file: str):
+        """Save the cleaned document dictionary to a new file."""
+        output_dir = os.path.dirname(output_file)
+        if output_dir:
+             os.makedirs(output_dir, exist_ok=True)
         
         with open(output_file, 'w') as f:
-            json.dump(cleaned_doc, f, indent=2)
+            json.dump(data_to_save, f, indent=2)
 
 if __name__ == "__main__":
-    # Example usage
-    input_file = "./output/final_doc.json"
+    # Example usage - needs adjustment if run directly now
+    input_file = "./output/final_structured_document.json" # Changed from final_doc.json
     output_file = "./output/cleaned_doc.json"
     
-    cleaner = CleanDoc(input_file)
-    cleaner.save_cleaned_document(output_file) 
+    # Load data first
+    try:
+        with open(input_file, 'r') as f:
+            doc_data = json.load(f)
+        
+        cleaner = CleanDoc() # Instantiate without file
+        cleaned_data = cleaner.clean_document(doc_data) # Clean the loaded data
+        cleaner.save_cleaned_document(cleaned_data, output_file) # Save the cleaned data
+        print(f"Cleaned document saved to {output_file}")
+    except FileNotFoundError:
+        print(f"Error: Input file not found at {input_file}")
+    except json.JSONDecodeError:
+        print(f"Error: Could not decode JSON from {input_file}") 
